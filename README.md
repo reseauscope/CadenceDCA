@@ -7,7 +7,7 @@ CadenceDCA simule l'évolution d'une épargne entre deux dates : un versement de
 1. Téléchargez puis ouvrez le fichier `CadenceDCA.html` dans votre navigateur (double-clic, ou glisser-déposer dans une fenêtre du navigateur).
 2. Saisissez les dates, les montants, la fréquence des versements, le rendement et l'inflation. Les résultats, le graphique et le tableau année par année se mettent à jour.
 3. Le bouton d'export enregistre le tableau en CSV, lisible dans Excel.
-4. La page s'ouvre en mode sombre. Le bouton « Mode clair », en haut de la page, passe en mode clair, puis revient en sombre. Ce choix n'est pas mémorisé : chaque ouverture repart en sombre. L'impression se fait toujours en couleurs claires.
+4. La page s'ouvre en mode sombre. Le bouton en haut de la page indique le mode vers lequel il bascule : « Mode clair » en mode sombre, « Mode sombre » en mode clair. Ce choix n'est pas mémorisé : chaque ouverture repart en sombre. L'impression se fait toujours en couleurs claires.
 
 Aucune installation n'est nécessaire.
 
@@ -33,4 +33,4 @@ Ce que permet l'outil, comment lire ses résultats et ses limites : voir `note-e
 
 ## Version
 
-Version actuelle : 0.2.0. Détail des fonctionnalités, des revues, des tests et des limites : `CadenceDCA-0.2.0.md`.
+Version actuelle : 0.2.1 (correctif). Détail : `CadenceDCA-0.2.1.md` ; fonctionnalités, revues et limites de la 0.2.0 : `CadenceDCA-0.2.0.md`.
