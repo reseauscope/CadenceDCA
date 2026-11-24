@@ -1,0 +1,1234 @@
+<!doctype html>
+<html lang="fr" data-theme="sombre">
+<!--
+  CadenceDCA : simulateur d'intérêts composés, de versements programmés (DCA) et d'inflation.
+  Créé par Jean Augeraud et AgoraMesh-MD.
+  Copyright (c) 2026 Jean Augeraud et AgoraMesh-MD.
+  Licence : PolyForm Noncommercial 1.0.0 (voir LICENSE). Usage commercial sur autorisation écrite de Jean Augeraud.
+  Composants tiers (palette Sanzo Wada) : voir NOTICE-TIERS.md.
+-->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="application-name" content="CadenceDCA">
+<meta name="author" content="Jean Augeraud et AgoraMesh-MD">
+<title>CadenceDCA — Simulateur DCA, intérêts composés &amp; pouvoir d'achat réel</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2032%2032%27%20width%3D%2716%27%20height%3D%2716%27%3E%3Cpath%20d%3D%27M3%2024%20Q6.25%2015.5%209.5%2021%20Q12.75%2027.5%2016%2018%20Q19.5%204%2023%2012%20Q25.6%2017.6%2029%205.6%27%20stroke%3D%27%2300b49b%27%20stroke-width%3D%273.3%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%20fill%3D%27none%27%2F%3E%3Ccircle%20cx%3D%2729%27%20cy%3D%275.6%27%20r%3D%273%27%20fill%3D%27%2300b49b%27%2F%3E%3C%2Fsvg%3E">
+<style>
+:root{
+  /* Palette Sanzo Wada #340 (Terminal Cyber-Émeraude) — déclinaison claire AA (≥ 4,5:1)
+     Source : reseauscope/Sanzo-Wada (Black #111314, Neutral Gray #b6bfc1, Sea Green #00b49b, Peach Red #f15a30) */
+  color-scheme:light;
+  --fond:#f3f5f5;
+  --fond-halo:radial-gradient(ellipse 90% 340px at 78% -90px,rgba(0,180,155,.11),transparent 70%);
+  --carte:#ffffff;
+  --carte-subtile:#f7f9f9;
+  --carte-hero:linear-gradient(135deg,#ffffff 0%,#eafaf6 100%);
+  --carte-hero-perte:linear-gradient(135deg,#ffffff 0%,#fef1ec 100%);
+  --hero-bord:rgba(0,122,105,.32);
+  --hero-bord-perte:rgba(194,59,22,.32);
+  --aire-opacite:0.06;
+  --texte:#111314;
+  --doux:#475255;
+  --bord:#dce2e3;
+  --bord-fort:#b6bfc1;
+  --bord-champ:#7e8a8d;
+  --accent:#007a69;
+  --accent-survol:#006355;
+  --accent-doux:rgba(0,122,105,.10);
+  --verse:#636f72;
+  --nominal:#111314;
+  --reel:#007a69;
+  --reel-doux:rgba(0,122,105,.12);
+  --perte:#c23b16;
+  --perte-doux:rgba(241,90,48,.11);
+  --inflation:#c23b16;
+  --inflation-doux:rgba(241,90,48,.11);
+  --grille:#e2e8e9;
+  --ombre:0 1px 2px rgba(17,19,20,.05),0 10px 26px -14px rgba(17,19,20,.10);
+  --ombre-bulle:0 12px 28px -6px rgba(17,19,20,.18),0 2px 6px rgba(17,19,20,.08);
+  --sur-accent:#ffffff;
+  --rayon:14px;
+  --rayon-petit:9px;
+}
+/* Thème sombre par défaut (décision 008) : piloté par l'attribut data-theme de <html>, et non plus par le système.
+   Le bouton « Mode clair » passe data-theme à « clair », ce qui rend le jeu clair ci-dessus. */
+@media not print{
+  :root[data-theme="sombre"]{
+    /* Palette Sanzo Wada #340 native (Terminal Cyber-Émeraude) — contrastes AA+ vérifiés */
+    color-scheme:dark;
+    --fond:#111314;
+    --fond-halo:radial-gradient(ellipse 90% 360px at 80% -90px,rgba(0,180,155,.18),transparent 72%);
+    --carte:#181c1f;
+    --carte-subtile:#14181b;
+    --carte-hero:linear-gradient(135deg,#181c1f 0%,rgba(0,180,155,.14) 100%);
+    --carte-hero-perte:linear-gradient(135deg,#181c1f 0%,rgba(241,90,48,.16) 100%);
+    --hero-bord:rgba(0,180,155,.38);
+    --hero-bord-perte:rgba(241,90,48,.42);
+    --aire-opacite:0.12;
+    --texte:#f4f7f7;
+    --doux:#b6bfc1;
+    --bord:#283034;
+    --bord-fort:#3c464b;
+    --bord-champ:#6b7a80;
+    --accent:#00b49b;
+    --accent-survol:#19c9b0;
+    --accent-doux:rgba(0,180,155,.15);
+    --verse:#b6bfc1;
+    --nominal:#f4f7f7;
+    --reel:#00b49b;
+    --reel-doux:rgba(0,180,155,.16);
+    --perte:#f15a30;
+    --perte-doux:rgba(241,90,48,.16);
+    --inflation:#f15a30;
+    --inflation-doux:rgba(241,90,48,.16);
+    --grille:#242b2f;
+    --ombre:0 1px 0 rgba(255,255,255,.04) inset,0 14px 32px -14px rgba(0,0,0,.65);
+    --ombre-bulle:0 14px 32px -6px rgba(0,0,0,.75);
+    --sur-accent:#111314;
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background-color:var(--fond);
+  background-image:var(--fond-halo);
+  background-repeat:no-repeat;
+  color:var(--texte);
+  font:15.5px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+main{max-width:1280px;margin:0 auto;padding:28px 20px 56px}
+
+/* En-tête éditorial */
+.entete-page{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:16px;
+  flex-wrap:wrap;
+  margin-bottom:26px;
+  padding-bottom:20px;
+  border-bottom:1px solid var(--bord);
+}
+.marque{display:flex;align-items:flex-start;gap:14px;min-width:0;flex:1 1 320px}
+.logo{
+  flex:0 0 auto;
+  width:44px;height:44px;
+  border-radius:12px;
+  background:var(--carte);
+  border:1px solid var(--hero-bord);
+  display:grid;place-items:center;
+  color:var(--accent);
+  box-shadow:var(--ombre);
+}
+h1{
+  font-size:clamp(1.45rem,2.2vw,1.9rem);
+  font-weight:750;
+  letter-spacing:-.025em;
+  line-height:1.18;
+  margin:0 0 6px;
+}
+.sous-titre{color:var(--doux);margin:0;max-width:66ch;font-size:.96rem}
+.badge-local{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:6px 12px;
+  border-radius:999px;
+  background:var(--reel-doux);
+  border:1px solid var(--hero-bord);
+  color:var(--texte);
+  font-size:.8rem;font-weight:600;
+  box-shadow:var(--ombre);
+  white-space:nowrap;
+}
+.badge-local svg{color:var(--reel);flex:0 0 auto}
+
+/* Grille principale : cockpit sticky à gauche, résultats à droite */
+.grille{display:grid;grid-template-columns:348px minmax(0,1fr);gap:24px;align-items:start}
+.grille>*,.ligne>*,.synthese-suite>*{min-width:0}
+@media (min-width:980px){
+  #formulaire{position:sticky;top:20px}
+}
+@media (max-width:979px){
+  .grille{grid-template-columns:1fr}
+}
+
+/* Cartes */
+.carte{
+  background:var(--carte);
+  border:1px solid var(--bord);
+  border-radius:var(--rayon);
+  padding:20px;
+  box-shadow:var(--ombre);
+}
+h2{
+  font-size:1.05rem;
+  font-weight:700;
+  letter-spacing:-.01em;
+  margin:0 0 14px;
+  display:flex;align-items:center;gap:8px;
+}
+.titre-icone{color:var(--accent);flex:0 0 auto}
+section{margin-bottom:20px}
+
+/* Formulaire */
+.groupe-form{
+  padding-top:14px;
+  margin-top:14px;
+  border-top:1px solid var(--bord);
+}
+.groupe-form:first-of-type{padding-top:0;margin-top:0;border-top:none}
+.etiquette-groupe{
+  font-size:.72rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--doux);
+  margin:0 0 10px;
+}
+form .champ{margin-bottom:12px}
+form .champ:last-child{margin-bottom:0}
+label{display:block;font-size:.86rem;font-weight:600;margin-bottom:5px;color:var(--texte)}
+input,select{
+  width:100%;min-width:0;
+  padding:9px 11px;
+  border:1px solid var(--bord-champ);
+  border-radius:var(--rayon-petit);
+  background:var(--carte-subtile);
+  color:var(--texte);
+  font:inherit;
+  font-size:.94rem;
+  font-variant-numeric:tabular-nums;
+  transition:border-color .15s ease,box-shadow .15s ease,background-color .15s ease;
+}
+input:hover,select:hover{border-color:var(--accent)}
+input:focus,select:focus{
+  outline:2px solid var(--accent);
+  outline-offset:1px;
+  border-color:var(--accent);
+  background:var(--carte);
+  box-shadow:0 0 0 4px var(--accent-doux);
+}
+.ligne{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:420px){
+  .ligne{grid-template-columns:1fr}
+}
+.aide{font-size:.79rem;color:var(--doux);margin-top:4px;line-height:1.4}
+.erreur{font-size:.82rem;font-weight:500;color:var(--perte);margin-top:4px;min-height:0}
+input[aria-invalid="true"]{
+  border-color:var(--perte);
+  background:var(--perte-doux);
+}
+input[aria-invalid="true"]:focus{
+  outline-color:var(--perte);
+  box-shadow:0 0 0 4px var(--perte-doux);
+}
+fieldset{
+  border:1px solid var(--bord);
+  border-radius:11px;
+  padding:12px 13px 13px;
+  margin:14px 0 0;
+  background:var(--carte-subtile);
+}
+legend{
+  font-size:.76rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--doux);
+  padding:0 6px;
+}
+.radios{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+  margin-bottom:12px;
+  padding:4px;
+  background:var(--fond);
+  border:1px solid var(--bord);
+  border-radius:9px;
+}
+.radios label{
+  display:flex;gap:6px;align-items:center;justify-content:center;
+  font-size:.82rem;font-weight:600;
+  margin:0;padding:7px 8px;
+  border-radius:6px;
+  cursor:pointer;
+  color:var(--doux);
+  text-align:center;
+  transition:background-color .15s ease,color .15s ease;
+}
+.radios label:has(input:checked){
+  background:var(--carte);
+  color:var(--texte);
+  box-shadow:0 1px 3px rgba(17,19,20,.16);
+}
+.radios input{
+  width:auto;margin:0;accent-color:var(--accent);flex:0 0 auto;
+}
+
+/* Alerte perte de pouvoir d'achat */
+.alerte{
+  display:flex;align-items:flex-start;gap:10px;
+  border:1px solid var(--perte);
+  border-left:4px solid var(--perte);
+  padding:12px 14px;
+  margin-bottom:18px;
+  background:var(--perte-doux);
+  color:var(--texte);
+  border-radius:10px;
+  font-size:.9rem;font-weight:500;
+}
+.alerte[hidden]{display:none}
+
+/* Synthèse KPI : carte vedette Gain réel + 4 indicateurs */
+.synthese{display:flex;flex-direction:column;gap:12px;margin-bottom:20px}
+.synthese-suite{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+}
+@media (max-width:1120px){
+  .synthese-suite{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:460px){
+  .synthese-suite{grid-template-columns:1fr}
+}
+.kpi{
+  padding:15px 16px;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  border-left:3px solid var(--bord);
+}
+.kpi.kpi-verse{border-left-color:var(--verse)}
+.kpi.kpi-nominal{border-left-color:var(--nominal)}
+.kpi.kpi-gain{border-left-color:var(--reel)}
+.kpi.kpi-gain.est-negatif{border-left-color:var(--perte)}
+.kpi.kpi-inflation{border-left-color:var(--inflation)}
+.kpi .libelle{
+  font-size:.78rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  color:var(--doux);
+}
+.kpi .valeur{
+  font-size:1.3rem;
+  font-weight:750;
+  letter-spacing:-.02em;
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+  line-height:1.25;
+}
+.kpi .detail{font-size:.8rem;color:var(--doux);line-height:1.38}
+
+/* Carte vedette : Gain réel */
+.kpi-hero{
+  background:var(--carte-hero);
+  border:1px solid var(--hero-bord);
+  border-left:4px solid var(--reel);
+  padding:18px 20px;
+  flex-direction:row;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px 20px;
+}
+.kpi-hero.est-negatif{
+  background:var(--carte-hero-perte);
+  border-color:var(--hero-bord-perte);
+  border-left-color:var(--perte);
+}
+.kpi-hero-gauche{display:flex;flex-direction:column;gap:4px;min-width:0}
+.kpi-hero-tete{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.kpi-hero .valeur{font-size:clamp(1.55rem,2.6vw,2rem)}
+.pilule-statut{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 9px;
+  border-radius:999px;
+  font-size:.74rem;font-weight:700;
+  background:var(--reel-doux);
+  border:1px solid var(--reel);
+  color:var(--texte);
+}
+.kpi-hero.est-negatif .pilule-statut{
+  background:var(--perte-doux);
+  border-color:var(--perte);
+  color:var(--texte);
+}
+.positif{color:var(--reel)}
+.negatif{color:var(--perte)}
+
+/* Barre de décomposition du patrimoine */
+.decomposition{
+  margin-bottom:16px;
+  padding:12px 14px;
+  border-radius:10px;
+  background:var(--carte-subtile);
+  border:1px solid var(--bord);
+}
+.decomposition[hidden]{display:none}
+.decomp-tete{
+  display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;
+  font-size:.8rem;color:var(--doux);margin-bottom:8px;
+}
+.decomp-barre{
+  display:flex;height:10px;border-radius:999px;overflow:hidden;
+  background:var(--grille);gap:2px;
+}
+.decomp-seg{height:100%;transition:width .25s ease}
+.decomp-seg.seg-verse{background:var(--verse)}
+.decomp-seg.seg-reel{background:var(--reel)}
+.decomp-seg.seg-perte{background:var(--perte)}
+.decomp-legende{
+  display:flex;flex-wrap:wrap;gap:10px 18px;
+  margin-top:8px;font-size:.79rem;color:var(--doux);
+  font-variant-numeric:tabular-nums;
+}
+.decomp-item{display:inline-flex;align-items:center;gap:6px}
+.decomp-puce{width:9px;height:9px;border-radius:3px;display:inline-block;flex:0 0 auto}
+.decomp-item strong{color:var(--texte);font-weight:650}
+
+/* Graphique */
+.entete-graphique{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  margin-bottom:12px;
+}
+.entete-graphique h2{margin:0}
+.legende{display:flex;flex-wrap:wrap;gap:10px 18px;font-size:.83rem;color:var(--doux)}
+.legende-item{display:inline-flex;align-items:center;gap:7px;font-weight:500}
+.legende-trait{display:inline-block;width:16px;height:3px;border-radius:2px;background:var(--c)}
+.legende-trait.tirets{
+  background:repeating-linear-gradient(90deg,var(--c) 0 5px,transparent 5px 8px);
+}
+.cadre-graphique{position:relative}
+#graphique{
+  width:100%;height:auto;display:block;
+  border-radius:8px;
+  cursor:crosshair;
+}
+#graphique:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:3px;
+}
+#graphique text{fill:var(--doux);font-size:11.5px;font-variant-numeric:tabular-nums}
+.aide-clavier{font-size:.76rem;color:var(--doux);margin:8px 0 0;text-align:right}
+.bulle{
+  position:absolute;pointer-events:none;z-index:5;
+  background:var(--carte);
+  border:1px solid var(--bord-fort);
+  border-radius:10px;
+  padding:10px 12px;
+  font-size:.82rem;line-height:1.5;
+  box-shadow:var(--ombre-bulle);
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+}
+.bulle-date{
+  font-weight:700;font-size:.84rem;
+  color:var(--texte);
+  padding-bottom:5px;margin-bottom:5px;
+  border-bottom:1px solid var(--bord);
+}
+.bulle-ligne{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.bulle-cle{display:inline-flex;align-items:center;gap:6px;color:var(--doux)}
+.bulle-point{width:8px;height:8px;border-radius:50%;display:inline-block}
+.bulle-val{font-weight:650;color:var(--texte)}
+.bulle-val.positif{color:var(--reel)}
+.bulle-val.negatif{color:var(--perte)}
+
+/* Tableau annuel avec en-tête fixe et lignes alternées */
+.entete-section{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.entete-section h2{margin:0}
+.tableau-defile{
+  overflow:auto;
+  max-height:460px;
+  border:1px solid var(--bord);
+  border-radius:10px;
+}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:.86rem;font-variant-numeric:tabular-nums}
+th,td{padding:10px 12px;border-bottom:1px solid var(--bord);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+thead th{
+  position:sticky;top:0;z-index:2;
+  background:var(--carte-subtile);
+  color:var(--doux);
+  font-size:.77rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.04em;
+  border-bottom:1px solid var(--bord-fort);
+}
+tbody tr:nth-child(even) td{background:var(--carte-subtile)}
+tbody tr:hover td{background:var(--accent-doux)}
+tbody tr:last-child td{border-bottom:none}
+tbody td:first-child{font-weight:650;color:var(--texte)}
+tbody td:last-child{font-weight:700;color:var(--reel)}
+.partiel{
+  display:inline-block;margin-left:5px;
+  padding:1px 6px;border-radius:999px;
+  font-size:.72rem;font-weight:600;
+  background:var(--accent-doux);color:var(--accent);
+}
+
+/* Bouton Export CSV */
+button{
+  display:inline-flex;align-items:center;gap:8px;
+  font:inherit;font-size:.88rem;font-weight:600;
+  padding:9px 15px;
+  border-radius:var(--rayon-petit);
+  border:1px solid var(--accent);
+  background:var(--accent);
+  color:var(--sur-accent);
+  cursor:pointer;
+  transition:background-color .15s ease,transform .1s ease,box-shadow .15s ease;
+}
+button:hover:not(:disabled){background:var(--accent-survol);box-shadow:0 4px 12px -4px rgba(0,180,155,.35)}
+button:active:not(:disabled){transform:translateY(1px)}
+button:focus-visible{outline:2px solid var(--texte);outline-offset:2px}
+button:disabled{opacity:.48;cursor:not-allowed}
+
+/* Bouton de thème (décision 008) : couleurs existantes de la carte et du texte */
+.entete-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+button.bascule-theme{background:var(--carte);color:var(--texte);border:1px solid var(--bord-champ);font-size:.8rem;padding:6px 12px;border-radius:999px;box-shadow:var(--ombre)}
+button.bascule-theme:hover:not(:disabled){background:var(--carte-subtile);box-shadow:var(--ombre)}
+button.bascule-theme[aria-pressed="true"]{border-color:var(--accent)}
+button.bascule-theme[hidden]{display:none}
+
+/* Note explicative */
+.note{padding:24px 26px}
+.note h2{margin-bottom:14px}
+.note p{margin:0 0 10px;max-width:84ch}
+.note ul{margin:0 0 14px;padding-left:20px;max-width:84ch}
+.note li{margin-bottom:6px;color:var(--texte)}
+.note p:last-child{margin-bottom:0}
+
+@media (max-width:520px){
+  main{padding:16px 12px 40px}
+  .carte{padding:15px}
+  .note{padding:18px 16px}
+  .entete-page{margin-bottom:18px;padding-bottom:14px}
+  .kpi-hero{padding:15px 16px}
+  .aide-clavier{text-align:left}
+  th,td{padding:8px 9px}
+}
+
+/* Impression propre : palette claire complète et contrastée, même depuis le thème sombre */
+@media print{
+  :root,:root[data-theme]{
+    color-scheme:light;
+    --fond:#ffffff;--fond-halo:none;--carte:#ffffff;--carte-subtile:#f7f9f9;--carte-hero:#ffffff;--carte-hero-perte:#ffffff;
+    --hero-bord:#cbd5d7;--hero-bord-perte:#c23b16;--aire-opacite:0;
+    --texte:#111314;--doux:#3c4649;--bord:#cbd5d7;--bord-fort:#94a1a4;--bord-champ:#636f72;
+    --accent:#007a69;--accent-survol:#006355;--accent-doux:#eafaf6;
+    --verse:#475255;--nominal:#111314;--reel:#007a69;--reel-doux:#eafaf6;
+    --perte:#c23b16;--perte-doux:#fef1ec;--inflation:#c23b16;--inflation-doux:#fef1ec;
+    --grille:#cbd5d7;--sur-accent:#ffffff;--ombre:none;--ombre-bulle:none;
+  }
+  body{background:#ffffff !important;color:#111314 !important;font-size:11pt}
+  main{max-width:none;padding:0}
+  .badge-local,#export,.aide-clavier,.bulle,.bascule-theme{display:none !important}
+  .grille{display:block}
+  #formulaire{position:static;margin-bottom:16px}
+  .carte{box-shadow:none !important;break-inside:avoid;margin-bottom:14px}
+  .tableau-defile{max-height:none;overflow:visible;border:1px solid #cbd5d7}
+  thead th{position:static}
+}
+</style>
+</head>
+<body>
+<main>
+<header class="entete-page">
+  <div class="marque">
+    <div class="logo" aria-hidden="true">
+      <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+        <path d="M2.5 25 Q4.75 20 7 23 Q9.75 26.5 12.5 20 Q15.5 10 18.5 16 Q21.5 23 24.5 12 Q26.6 4.6 29.3 5.2" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="29.3" cy="5.2" r="2.5" fill="currentColor"/>
+      </svg>
+    </div>
+    <div>
+      <h1>CadenceDCA</h1>
+      <p class="sous-titre">Intérêts composés, versements programmés et inflation : ce que pourrait rapporter votre épargne, avant et après inflation.</p>
+    </div>
+  </div>
+  <div class="entete-actions">
+  <button type="button" id="bascule-theme" class="bascule-theme" aria-pressed="false" hidden>Mode clair</button>
+  <div class="badge-local" aria-label="Fonctionnement local sans connexion">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      <path d="M9 12l2 2 4-4"/>
+    </svg>
+    <span>100&nbsp;% hors ligne · Sanzo Wada #340</span>
+  </div>
+  </div>
+</header>
+
+<div class="grille">
+<form id="formulaire" class="carte" novalidate>
+  <h2>
+    <svg class="titre-icone" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/>
+      <line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/>
+      <line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/>
+      <line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>
+    </svg>
+    Paramètres
+  </h2>
+
+  <div class="groupe-form">
+    <p class="etiquette-groupe">Horizon de placement</p>
+    <div class="ligne">
+      <div class="champ"><label for="dateDebut">Date de départ</label><input type="date" id="dateDebut" aria-describedby="err-dateDebut" required><div class="erreur" id="err-dateDebut"></div></div>
+      <div class="champ"><label for="dateFin">Date de fin</label><input type="date" id="dateFin" aria-describedby="err-dateFin" required><div class="erreur" id="err-dateFin"></div></div>
+    </div>
+  </div>
+
+  <div class="groupe-form">
+    <p class="etiquette-groupe">Capital &amp; versements (DCA)</p>
+    <div class="champ"><label for="versementInitial">Versement initial (€)</label><input type="text" inputmode="decimal" id="versementInitial" aria-describedby="err-versementInitial" value="1 000"><div class="erreur" id="err-versementInitial"></div></div>
+    <div class="ligne">
+      <div class="champ"><label for="versementRegulier">Versement régulier (€)</label><input type="text" inputmode="decimal" id="versementRegulier" aria-describedby="err-versementRegulier" value="100"><div class="erreur" id="err-versementRegulier"></div></div>
+      <div class="champ"><label for="frequence">Fréquence</label>
+        <select id="frequence">
+          <option value="hebdomadaire">Hebdomadaire</option>
+          <option value="mensuelle" selected>Mensuelle</option>
+          <option value="trimestrielle">Trimestrielle</option>
+          <option value="annuelle">Annuelle</option>
+          <option value="aucune">Aucun versement</option>
+        </select></div>
+    </div>
+  </div>
+
+  <div class="groupe-form">
+    <p class="etiquette-groupe">Hypothèse de rendement</p>
+    <div class="champ"><label for="rendement">Rendement annuel (%)</label><input type="text" inputmode="decimal" id="rendement" aria-describedby="aide-rendement err-rendement" value="5"><div class="aide" id="aide-rendement">Rendement moyen espéré, net de frais.</div><div class="erreur" id="err-rendement"></div></div>
+  </div>
+
+  <fieldset>
+    <legend>Inflation</legend>
+    <div class="radios">
+      <label><input type="radio" name="modeInflation" value="annuelle" checked> Taux annuel moyen</label>
+      <label><input type="radio" name="modeInflation" value="cumulee"> Cumul sur la période</label>
+    </div>
+    <div class="champ"><label for="inflation" id="libelle-inflation">Inflation annuelle (%)</label><input type="text" inputmode="decimal" id="inflation" aria-describedby="aide-inflation err-inflation" value="2"><div class="aide" id="aide-inflation"></div><div class="erreur" id="err-inflation"></div></div>
+  </fieldset>
+  <div class="erreur" id="err-general" role="alert"></div>
+</form>
+
+<div>
+  <div class="alerte" id="alerte-perte" hidden role="status"></div>
+  <div class="synthese" id="synthese"></div>
+
+  <section class="carte">
+    <div class="entete-graphique">
+      <h2>
+        <svg class="titre-icone" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
+        </svg>
+        Évolution du placement
+      </h2>
+      <div class="legende">
+        <span class="legende-item"><span class="legende-trait tirets" style="--c:var(--verse)"></span>Total versé</span>
+        <span class="legende-item"><span class="legende-trait" style="--c:var(--nominal)"></span>Valeur nominale</span>
+        <span class="legende-item"><span class="legende-trait" style="--c:var(--reel)"></span>Valeur réelle (après inflation)</span>
+      </div>
+    </div>
+    <div class="decomposition" id="decomposition" hidden></div>
+    <div class="cadre-graphique">
+      <svg id="graphique" viewBox="0 0 720 320" role="img" tabindex="0" aria-label="Courbes du total versé, de la valeur nominale et de la valeur réelle. Utilisez la souris ou les flèches gauche et droite pour inspecter chaque mois."></svg>
+      <div class="bulle" id="bulle" hidden></div>
+    </div>
+    <p class="aide-clavier">Survolez la courbe ou utilisez les flèches ← / → au clavier (Maj pour avancer d'un an).</p>
+  </section>
+
+  <section class="carte">
+    <div class="entete-section">
+      <h2>
+        <svg class="titre-icone" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="10" x2="9" y2="20"/>
+        </svg>
+        Année par année
+      </h2>
+      <button type="button" id="export">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Exporter en CSV
+      </button>
+    </div>
+    <div class="tableau-defile">
+      <table>
+        <thead><tr><th>Année</th><th>Versé dans l'année</th><th>Versé cumulé</th><th>Intérêts de l'année</th><th>Valeur nominale</th><th>Valeur réelle</th></tr></thead>
+        <tbody id="corps-tableau"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+</div>
+
+<section class="carte note" id="note">
+<h2>À quoi sert ce simulateur</h2>
+<p><strong>Ce que fait l'outil.</strong> Il calcule ce que devient une épargne placée entre deux dates : un versement de départ, puis des versements réguliers (c'est le DCA, « investissement programmé »), qui rapportent chaque mois des intérêts eux-mêmes réinvestis (intérêts composés). Il retire ensuite l'effet de l'inflation pour montrer ce que vaut réellement cette épargne.</p>
+<p><strong>Comment lire les résultats.</strong></p>
+<ul>
+<li>Le <strong>gain nominal</strong> est la différence entre la valeur finale et ce que vous avez versé, en euros courants.</li>
+<li>Le <strong>gain réel</strong> fait la même différence en pouvoir d'achat, exprimé en euros de la date de départ. Exemple : 1 000 € au départ puis 100 € par mois pendant 10 ans à 5 % par an donnent 17 128,10 €, soit 4 128,10 € de gain nominal. Avec 2 % d'inflation par an, le gain réel n'est plus que de 2 155,49 €.</li>
+<li>Si l'inflation dépasse le rendement, le gain réel devient négatif : la page vous prévient.</li>
+</ul>
+<p><strong>Ce que vous pouvez faire avec.</strong></p>
+<ul>
+<li>Comparer des durées, des montants mensuels ou des fréquences de versement.</li>
+<li>Mesurer l'effet d'un point de rendement en plus ou en moins sur 10, 20 ou 30 ans.</li>
+<li>Saisir l'inflation en taux annuel moyen, ou en cumul sur la période si vous le connaissez (par exemple l'inflation publiée entre deux dates).</li>
+<li>Exporter le tableau année par année en CSV pour le retravailler dans Excel.</li>
+</ul>
+<p><strong>Limites.</strong> Le rendement est supposé constant, alors que les marchés varient. Les frais, la fiscalité (flat tax, PEA, assurance-vie) et les prélèvements sociaux ne sont pas déduits. La durée compte en mois entiers, et les versements hebdomadaires sont lissés à 52/12 par mois. C'est une simulation, pas un conseil en investissement. Aucune donnée ne quitte votre ordinateur.</p>
+</section>
+<footer class="aide">
+  <p>Créé par Jean Augeraud et AgoraMesh-MD · Licence PolyForm Noncommercial 1.0.0</p>
+</footer>
+</main>
+<script id="moteur">
+"use strict";
+/* Moteur de calcul du simulateur DCA. Code pur : aucun accès au DOM.
+   Contrat : Dev/08-docs/developpeur/moteur.md */
+var Moteur = (function () {
+  var FREQUENCES = {
+    hebdomadaire: { parMois: 52 / 12, pasMois: 1 },
+    mensuelle: { parMois: 1, pasMois: 1 },
+    trimestrielle: { parMois: 1, pasMois: 3 },
+    annuelle: { parMois: 1, pasMois: 12 },
+    aucune: { parMois: 0, pasMois: 1 }
+  };
+
+  /* Dates en texte "AAAA-MM-JJ" seulement, construites en heure locale : pas de décalage de fuseau. */
+  function versDate(valeur, nom) {
+    var d = new Date(NaN);
+    if (typeof valeur === "string" && /^\d{4}-\d{2}-\d{2}$/.test(valeur)) {
+      var p = valeur.split("-").map(Number);
+      d = dateLocale(p[0], p[1] - 1, p[2]);
+      if (d.getFullYear() !== p[0] || d.getMonth() !== p[1] - 1 || d.getDate() !== p[2]) d = new Date(NaN);
+    }
+    if (isNaN(d.getTime())) throw new Error("La " + nom + " n'est pas une date valide (format AAAA-MM-JJ).");
+    return d;
+  }
+
+  function montant(valeur, nom) {
+    return valeur === undefined ? 0 : nombre(valeur, nom, { positif: true });
+  }
+
+  function nombre(valeur, nom, options) {
+    if (typeof valeur !== "number" || !isFinite(valeur)) throw new Error("Le champ « " + nom + " » doit être un nombre.");
+    if (options && options.positif && valeur < 0) throw new Error("Le champ « " + nom + " » ne peut pas être négatif.");
+    return valeur;
+  }
+
+  /* Nombre de mois entiers entre deux dates : nombre d'échéances (départ + k mois, ramené au dernier
+     jour du mois si besoin) qui tombent au plus tard à la date de fin. Le reliquat de jours est ignoré. */
+  function moisEntiers(debut, fin) {
+    var n = (fin.getFullYear() - debut.getFullYear()) * 12 + (fin.getMonth() - debut.getMonth());
+    if (ajouterMois(debut, n) > fin) n -= 1;
+    return n;
+  }
+
+  /* Date du mois k : même jour que la date de départ, ramené au dernier jour du mois si besoin. */
+  function dateLocale(annee, mois, jour) {
+    var d = new Date(2000, 0, 1);
+    d.setFullYear(annee, mois, jour);
+    return d;
+  }
+  function ajouterMois(debut, k) {
+    var annee = debut.getFullYear(), mois = debut.getMonth() + k;
+    var dernierJour = dateLocale(annee, mois + 1, 0).getDate();
+    return dateLocale(annee, mois, Math.min(debut.getDate(), dernierJour));
+  }
+
+  function enIso(d) {
+    var m = d.getMonth() + 1, j = d.getDate();
+    return String(d.getFullYear()).padStart(4, "0") + "-" + (m < 10 ? "0" : "") + m + "-" + (j < 10 ? "0" : "") + j;
+  }
+
+  function simuler(p) {
+    if (!p || typeof p !== "object") throw new Error("Paramètres manquants.");
+    var debut = versDate(p.dateDebut, "date de départ");
+    var fin = versDate(p.dateFin, "date de fin");
+    if (fin <= debut) throw new Error("La date de fin doit être postérieure à la date de départ.");
+    var n = moisEntiers(debut, fin);
+    if (n < 1) throw new Error("La période doit durer au moins un mois entier.");
+    var initial = montant(p.versementInitial, "versement initial");
+    var regulier = montant(p.versementRegulier, "versement régulier");
+    var frequence = p.frequence === undefined ? "mensuelle" : p.frequence;
+    var f = Object.prototype.hasOwnProperty.call(FREQUENCES, frequence) ? FREQUENCES[frequence] : null;
+    if (!f) throw new Error("Fréquence inconnue : " + frequence + ".");
+    var r = nombre(p.rendementAnnuel, "rendement annuel");
+    if (r <= -1) throw new Error("Le rendement annuel doit être supérieur à -100 %.");
+    var rm = Math.pow(1 + r, 1 / 12) - 1;
+
+    /* Inflation : taux annuel moyen, ou cumul sur toute la période. */
+    var annees = n / 12;
+    var infl = p.inflation || { mode: "annuelle", taux: 0 };
+    var tauxInfl = nombre(infl.taux, "inflation");
+    var iAnnuel, iCumul;
+    if (infl.mode === "cumulee") {
+      if (tauxInfl <= -1) throw new Error("L'inflation cumulée doit être supérieure à -100 %.");
+      iCumul = tauxInfl;
+      iAnnuel = Math.pow(1 + iCumul, 1 / annees) - 1;
+    } else if (infl.mode === "annuelle") {
+      if (tauxInfl <= -1) throw new Error("L'inflation annuelle doit être supérieure à -100 %.");
+      iAnnuel = tauxInfl;
+      iCumul = Math.pow(1 + iAnnuel, annees) - 1;
+    } else {
+      throw new Error("Mode d'inflation inconnu : " + infl.mode + ".");
+    }
+    var im = Math.pow(1 + iAnnuel, 1 / 12) - 1;
+
+    /* Valeurs réelles en euros de la date de départ : un flux au mois k est divisé par (1 + im)^k. */
+    var valeur = initial, verse = initial, verseReel = initial, mois = [];
+    for (var k = 0; k < n; k++) {
+      var versementDuMois = (k % f.pasMois === 0) ? regulier * f.parMois : 0;
+      valeur += versementDuMois;
+      verse += versementDuMois;
+      verseReel += versementDuMois / Math.pow(1 + im, k);
+      var interets = valeur * rm;
+      valeur += interets;
+      mois.push({
+        date: enIso(ajouterMois(debut, k + 1)),
+        versementDuMois: versementDuMois,
+        verseCumule: verse,
+        interetsDuMois: interets,
+        valeur: valeur,
+        verseCumuleReel: verseReel,
+        valeurReelle: valeur / Math.pow(1 + im, k + 1)
+      });
+    }
+    var valeurReelle = valeur / Math.pow(1 + im, n);
+    return {
+      nombreMois: n,
+      tauxMensuel: rm,
+      mois: mois,
+      totaux: {
+        totalVerse: verse,
+        valeurFinale: valeur,
+        gain: valeur - verse,
+        rendementGlobal: verse > 0 ? (valeur - verse) / verse : 0,
+        inflationAnnuelle: iAnnuel,
+        inflationCumulee: iCumul,
+        totalVerseReel: verseReel,
+        valeurFinaleReelle: valeurReelle,
+        gainReel: valeurReelle - verseReel,
+        pertePouvoirAchat: valeurReelle - verseReel < -0.005
+      }
+    };
+  }
+
+  return { simuler: simuler, moisEntiers: moisEntiers, FREQUENCES: FREQUENCES };
+})();
+if (typeof module !== "undefined") module.exports = Moteur;
+</script>
+<script id="interface">
+"use strict";
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var euros = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 2, minimumFractionDigits: 2 });
+  var eurosRond = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+  var pct = new Intl.NumberFormat("fr-FR", { style: "percent", minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  var nombreCsv = new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: false });
+  var dernier = null;
+  /* Libellés des fréquences, lus depuis les paramètres de la simulation exportée (pas depuis le DOM courant). */
+  var LIBELLES_FREQUENCE = { hebdomadaire: "Hebdomadaire", mensuelle: "Mensuelle", trimestrielle: "Trimestrielle", annuelle: "Annuelle", aucune: "Aucun versement" };
+  /* Arrondi au centime pour l'affichage : évite « -0,00 € » dû aux arrondis flottants. */
+  function auCentime(v) { return (Math.round(v * 100) / 100) || 0; }
+  function eur(v) { return euros.format(auCentime(v)); }
+
+  function aujourdHui() {
+    var d = new Date(), m = d.getMonth() + 1, j = d.getDate();
+    return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m + "-" + (j < 10 ? "0" : "") + j;
+  }
+  function plusAnnees(iso, a) {
+    var p = iso.split("-"), j = Math.min(Number(p[2]), new Date(Number(p[0]) + a, Number(p[1]), 0).getDate());
+    return (Number(p[0]) + a) + "-" + p[1] + "-" + (j < 10 ? "0" : "") + j;
+  }
+
+  /* Lit un nombre au format français : espaces de milliers, virgule ou point décimal. */
+  function lireNombre(id, nom, options) {
+    var brut = $(id).value.replace(/[\s  €%]/g, "").replace(",", ".");
+    if (brut === "" && options.vide !== undefined) return options.vide;
+    if (!/^-?\d+(\.\d+)?$/.test(brut)) throw { champ: id, message: "Saisissez un nombre (ex. 1 250,50)." };
+    var v = Number(brut);
+    if (options.positif && v < 0) throw { champ: id, message: nom + " ne peut pas être négatif." };
+    return v;
+  }
+
+  function effacerErreurs() {
+    ["dateDebut", "dateFin", "versementInitial", "versementRegulier", "rendement", "inflation"].forEach(function (id) {
+      $(id).removeAttribute("aria-invalid"); $("err-" + id).textContent = "";
+    });
+    $("err-general").textContent = "";
+  }
+
+  function lireParametres() {
+    var mode = document.querySelector("input[name=modeInflation]:checked").value;
+    if (!$("dateDebut").value) throw { champ: "dateDebut", message: "Choisissez une date de départ." };
+    if (!$("dateFin").value) throw { champ: "dateFin", message: "Choisissez une date de fin." };
+    return {
+      dateDebut: $("dateDebut").value,
+      dateFin: $("dateFin").value,
+      versementInitial: lireNombre("versementInitial", "Le versement initial", { positif: true, vide: 0 }),
+      versementRegulier: lireNombre("versementRegulier", "Le versement régulier", { positif: true, vide: 0 }),
+      frequence: $("frequence").value,
+      rendementAnnuel: lireNombre("rendement", "Le rendement", { vide: 0 }) / 100,
+      inflation: { mode: mode, taux: lireNombre("inflation", "L'inflation", { vide: 0 }) / 100 }
+    };
+  }
+
+  function kpi(libelle, valeur, detail, classe, variante) {
+    return '<div class="carte kpi ' + (variante || "") + '"><div class="libelle">' + libelle + '</div><div class="valeur ' + (classe || "") + '">' + valeur + "</div>" +
+      (detail ? '<div class="detail">' + detail + "</div>" : "") + "</div>";
+  }
+  function signe(v) { return auCentime(v) >= 0 ? "positif" : "negatif"; }
+
+  function parAnnee(r, p) {
+    var lignes = [], debutAnnee = 0;
+    for (var a = 0; debutAnnee < r.mois.length; a++) {
+      var tranche = r.mois.slice(debutAnnee, debutAnnee + 12);
+      var verse = tranche.reduce(function (s, m) { return s + m.versementDuMois; }, a === 0 ? p.versementInitial : 0);
+      var interets = tranche.reduce(function (s, m) { return s + m.interetsDuMois; }, 0);
+      var fin = tranche[tranche.length - 1];
+      lignes.push({ annee: a + 1, mois: tranche.length, date: fin.date, verse: verse, verseCumule: fin.verseCumule, interets: interets, valeur: fin.valeur, valeurReelle: fin.valeurReelle });
+      debutAnnee += 12;
+    }
+    return lignes;
+  }
+
+  function dateFr(iso) { var p = iso.split("-"); return p[2] + "/" + p[1] + "/" + p[0]; }
+
+  function afficherDecomposition(t, p) {
+    var bloc = $("decomposition");
+    if (!bloc) return;
+    var verseR = Math.max(0, t.totalVerseReel);
+    var valR = Math.max(0, t.valeurFinaleReelle);
+    var gainR = auCentime(t.gainReel);
+    var dateDep = dateFr(p.dateDebut);
+    if (verseR <= 0 && valR <= 0) { bloc.hidden = true; bloc.innerHTML = ""; return; }
+    var fmtPct = function (v) { return Math.round(v) + "\u00a0%"; };
+    bloc.hidden = false;
+    if (gainR >= 0 && valR > 0) {
+      var pVerse = (verseR / valR) * 100;
+      var pGain = Math.max(0, 100 - pVerse);
+      bloc.innerHTML =
+        '<div class="decomp-tete"><span><strong>Répartition de la valeur finale réelle</strong> (' + eur(t.valeurFinaleReelle) + ')</span><span>En euros constants du ' + dateDep + '</span></div>' +
+        '<div class="decomp-barre" role="img" aria-label="Versé réel ' + fmtPct(pVerse) + ', gain réel ' + fmtPct(pGain) + '">' +
+          '<div class="decomp-seg seg-verse" style="width:' + pVerse.toFixed(2) + '%"></div>' +
+          '<div class="decomp-seg seg-reel" style="width:' + pGain.toFixed(2) + '%"></div>' +
+        '</div>' +
+        '<div class="decomp-legende">' +
+          '<span class="decomp-item"><span class="decomp-puce" style="background:var(--verse)"></span>Versé réel&nbsp;: <strong>' + eur(t.totalVerseReel) + '</strong> (' + fmtPct(pVerse) + ')</span>' +
+          '<span class="decomp-item"><span class="decomp-puce" style="background:var(--reel)"></span>Gain réel&nbsp;: <strong>' + eur(t.gainReel) + '</strong> (' + fmtPct(pGain) + ')</span>' +
+        '</div>';
+    } else if (verseR > 0) {
+      var perteR = Math.max(0, verseR - valR);
+      var pConserve = Math.max(0, Math.min(100, (valR / verseR) * 100));
+      var pPerte = Math.max(0, 100 - pConserve);
+      bloc.innerHTML =
+        '<div class="decomp-tete"><span><strong>Érosion du capital en euros constants</strong> (versé réel ' + eur(t.totalVerseReel) + ')</span><span>En euros du ' + dateDep + '</span></div>' +
+        '<div class="decomp-barre" role="img" aria-label="Pouvoir d\'achat conservé ' + fmtPct(pConserve) + ', perte de pouvoir d\'achat ' + fmtPct(pPerte) + '">' +
+          '<div class="decomp-seg seg-verse" style="width:' + pConserve.toFixed(2) + '%"></div>' +
+          '<div class="decomp-seg seg-perte" style="width:' + pPerte.toFixed(2) + '%"></div>' +
+        '</div>' +
+        '<div class="decomp-legende">' +
+          '<span class="decomp-item"><span class="decomp-puce" style="background:var(--verse)"></span>Valeur finale réelle&nbsp;: <strong>' + eur(t.valeurFinaleReelle) + '</strong> (' + fmtPct(pConserve) + ')</span>' +
+          '<span class="decomp-item"><span class="decomp-puce" style="background:var(--perte)"></span>Perte de pouvoir d\'achat&nbsp;: <strong>' + eur(-perteR) + '</strong> (' + fmtPct(pPerte) + ')</span>' +
+        '</div>';
+    } else {
+      bloc.hidden = true; bloc.innerHTML = "";
+    }
+  }
+
+  function afficherSynthese(r, p) {
+    var t = r.totaux;
+    var reelPositif = auCentime(t.gainReel) >= 0;
+    var gainPositif = auCentime(t.gain) >= 0;
+    var badgeHero = reelPositif ? "Pouvoir d'achat préservé" : "Érosion du pouvoir d'achat";
+    var hero =
+      '<div class="carte kpi kpi-hero' + (reelPositif ? "" : " est-negatif") + '">' +
+        '<div class="kpi-hero-gauche">' +
+          '<div class="kpi-hero-tete"><div class="libelle">Gain réel (après inflation)</div><span class="pilule-statut">' + badgeHero + '</span></div>' +
+          '<div class="valeur ' + signe(t.gainReel) + '">' + eur(t.gainReel) + '</div>' +
+          '<div class="detail">valeur réelle ' + eur(t.valeurFinaleReelle) + ' − versé réel ' + eur(t.totalVerseReel) + ', en euros du ' + dateFr(p.dateDebut) + '</div>' +
+        '</div>' +
+      '</div>';
+    var suite = '<div class="synthese-suite">' +
+      kpi("Total versé", eur(t.totalVerse), r.nombreMois + " mois", "", "kpi-verse") +
+      kpi("Valeur finale", eur(t.valeurFinale), "au " + dateFr(r.mois[r.mois.length - 1].date), "", "kpi-nominal") +
+      kpi("Gain nominal", eur(t.gain), pct.format(t.rendementGlobal) + " du total versé", signe(t.gain), "kpi-gain" + (gainPositif ? "" : " est-negatif")) +
+      kpi("Inflation cumulée", pct.format(t.inflationCumulee), pct.format(t.inflationAnnuelle) + " par an", "", "kpi-inflation") +
+      '</div>';
+    $("synthese").innerHTML = hero + suite;
+    afficherDecomposition(t, p);
+    var alerte = $("alerte-perte");
+    if (t.pertePouvoirAchat) {
+      alerte.hidden = false;
+      alerte.textContent = auCentime(t.gain) >= 0
+        ? "Attention : le gain nominal ne compense pas l'inflation. En pouvoir d'achat, vous perdez " + eur(-t.gainReel) + "."
+        : (t.inflationCumulee < 0
+          ? "Attention : le placement perd de la valeur (" + eur(t.gainReel) + " en pouvoir d'achat, partiellement atténué par la déflation)."
+          : "Attention : le placement perd de la valeur, et l'inflation aggrave la perte (" + eur(t.gainReel) + " en pouvoir d'achat).");
+    } else { alerte.hidden = true; alerte.textContent = ""; }
+  }
+
+  function afficherTableau(lignes) {
+    $("corps-tableau").innerHTML = lignes.map(function (l) {
+      var badge = l.mois < 12 ? '<span class="partiel">' + l.mois + ' mois</span>' : "";
+      return "<tr><td>Année " + l.annee + badge + "</td><td>" + eur(l.verse) + "</td><td>" + eur(l.verseCumule) +
+        '</td><td class="' + signe(l.interets) + '">' + eur(l.interets) + "</td><td>" + eur(l.valeur) + "</td><td>" + eur(l.valeurReelle) + "</td></tr>";
+    }).join("");
+  }
+
+  /* Graduation « ronde » de l'axe des montants. */
+  function pasRond(max, nb) {
+    var brut = max / nb, puissance = Math.pow(10, Math.floor(Math.log10(brut))), f = brut / puissance;
+    return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * puissance;
+  }
+
+  var G = { l: 68, r: 18, t: 16, b: 34, w: 720, h: 320 };
+  var etatGraphique = null;
+
+  function afficherPointGraphique(k) {
+    if (!etatGraphique) return;
+    var g = etatGraphique, svg = $("graphique"), bulle = $("bulle"), curseur = $("curseur");
+    if (!curseur || !bulle) return;
+    k = Math.max(0, Math.min(g.n, k));
+    g.indexActif = k;
+    var cx = g.x(k);
+    curseur.setAttribute("x1", cx); curseur.setAttribute("x2", cx); curseur.setAttribute("visibility", "visible");
+    g.series.forEach(function (serie) {
+      var pt = $("pt-" + serie.cle);
+      if (pt) {
+        pt.setAttribute("cx", cx.toFixed(1));
+        pt.setAttribute("cy", g.y(serie.valeurs[k]).toFixed(1));
+        pt.setAttribute("visibility", "visible");
+      }
+    });
+    var date = k === 0 ? dateFr(g.p.dateDebut) : dateFr(g.r.mois[k - 1].date);
+    var vVerse = g.series[0].valeurs[k], vNom = g.series[1].valeurs[k], vReel = g.series[2].valeurs[k];
+    var vVerseReel = k === 0 ? g.p.versementInitial : g.r.mois[k - 1].verseCumuleReel;
+    var gainReelPoint = vReel - vVerseReel;
+    bulle.innerHTML =
+      '<div class="bulle-date">' + date + (k > 0 ? ' · mois ' + k : ' · départ') + '</div>' +
+      '<div class="bulle-ligne"><span class="bulle-cle"><span class="bulle-point" style="background:var(--verse)"></span>Versé</span><span class="bulle-val">' + eur(vVerse) + '</span></div>' +
+      '<div class="bulle-ligne"><span class="bulle-cle"><span class="bulle-point" style="background:var(--nominal)"></span>Nominal</span><span class="bulle-val">' + eur(vNom) + '</span></div>' +
+      '<div class="bulle-ligne"><span class="bulle-cle"><span class="bulle-point" style="background:var(--reel)"></span>Réel</span><span class="bulle-val">' + eur(vReel) + '</span></div>' +
+      '<div class="bulle-ligne"><span class="bulle-cle">Gain réel</span><span class="bulle-val ' + signe(gainReelPoint) + '">' + eur(gainReelPoint) + '</span></div>';
+    bulle.hidden = false;
+    var rect = svg.getBoundingClientRect(), echelle = rect.width > 0 ? G.w / rect.width : 1;
+    var gauche = cx / echelle + 14;
+    if (gauche + bulle.offsetWidth > rect.width) gauche = cx / echelle - bulle.offsetWidth - 14;
+    bulle.style.left = Math.max(4, gauche) + "px";
+    bulle.style.top = "10px";
+  }
+
+  function cacherPointGraphique() {
+    var bulle = $("bulle"), curseur = $("curseur");
+    if (bulle) bulle.hidden = true;
+    if (curseur) curseur.setAttribute("visibility", "hidden");
+    ["verse", "valeur", "reel"].forEach(function (cle) {
+      var pt = $("pt-" + cle);
+      if (pt) pt.setAttribute("visibility", "hidden");
+    });
+    if (etatGraphique) etatGraphique.indexActif = null;
+  }
+
+  function afficherGraphique(r, p) {
+    var svg = $("graphique"), n = r.mois.length;
+    var largeur = Math.round(svg.parentNode.clientWidth) || 720;
+    G.w = Math.max(300, largeur);
+    G.h = Math.round(Math.max(230, Math.min(340, G.w * 0.46)));
+    G.l = G.w < 420 ? 58 : 70;
+    svg.setAttribute("viewBox", "0 0 " + G.w + " " + G.h);
+    var series = [
+      { cle: "verse", couleur: "var(--verse)", valeurs: [p.versementInitial].concat(r.mois.map(function (m) { return m.verseCumule; })) },
+      { cle: "valeur", couleur: "var(--nominal)", valeurs: [p.versementInitial].concat(r.mois.map(function (m) { return m.valeur; })) },
+      { cle: "reel", couleur: "var(--reel)", valeurs: [p.versementInitial].concat(r.mois.map(function (m) { return m.valeurReelle; })) }
+    ];
+    var max = Math.max.apply(null, series.map(function (s) { return Math.max.apply(null, s.valeurs); }));
+    var min = Math.min(0, Math.min.apply(null, series.map(function (s) { return Math.min.apply(null, s.valeurs); })));
+    if (max - min < 1) max = min + 100;
+    var pas = pasRond(max - min, 5), haut = Math.ceil(max / pas) * pas, bas = Math.floor(min / pas) * pas;
+    var x = function (k) { return G.l + (G.w - G.l - G.r) * k / n; };
+    var y = function (v) { return G.t + (G.h - G.t - G.b) * (1 - (v - bas) / (haut - bas)); };
+    var yZero = y(Math.max(bas, 0)).toFixed(1);
+
+    var s = '<defs>' +
+      '<linearGradient id="gradReel" x1="0" y1="0" x2="0" y2="1">' +
+        '<stop offset="0%" style="stop-color:var(--reel);stop-opacity:var(--aire-opacite)"/>' +
+        '<stop offset="100%" style="stop-color:var(--reel);stop-opacity:0"/>' +
+      '</linearGradient>' +
+    '</defs>';
+
+    for (var v = bas; v <= haut + pas / 2; v += pas) {
+      var yv = y(v).toFixed(1);
+      var axeZero = Math.abs(v) < pas * 0.001;
+      s += '<line x1="' + G.l + '" x2="' + (G.w - G.r) + '" y1="' + yv + '" y2="' + yv + '" stroke="var(--grille)"' + (axeZero ? ' stroke-width="1.2"' : ' stroke-dasharray="3 4"') + '/>';
+      s += '<text x="' + (G.l - 8) + '" y="' + (y(v) + 4).toFixed(1) + '" text-anchor="end">' + eurosRond.format(v) + "</text>";
+    }
+    var annees = n / 12, maxEtiquettes = Math.max(3, Math.floor((G.w - G.l - G.r) / 52));
+    var pasAn = [1, 2, 5, 10, 20, 25, 50].filter(function (c) { return annees / c <= maxEtiquettes; })[0] || 100;
+    for (var a = 0; a * 12 <= n; a += pasAn) {
+      s += '<text x="' + x(a * 12).toFixed(1) + '" y="' + (G.h - G.b + 20) + '" text-anchor="middle">' + (a === 0 ? "départ" : "an " + a) + "</text>";
+    }
+    if (n < 12) s += '<text x="' + x(n).toFixed(1) + '" y="' + (G.h - G.b + 20) + '" text-anchor="end">' + n + " mois</text>";
+
+    /* Aire légère sous la valeur réelle uniquement, calibrée pour maintenir toutes les courbes ≥ 4,5:1 */
+    var ptsReel = series[2].valeurs.map(function (v, k) { return x(k).toFixed(1) + "," + y(v).toFixed(1); }).join(" ");
+    var aireReel = x(0).toFixed(1) + "," + yZero + " " + ptsReel + " " + x(n).toFixed(1) + "," + yZero;
+    s += '<polygon fill="url(#gradReel)" points="' + aireReel + '"/>';
+
+    /* Courbes et points de repère terminaux */
+    series.forEach(function (serie) {
+      var pts = serie.valeurs.map(function (v, k) { return x(k).toFixed(1) + "," + y(v).toFixed(1); }).join(" ");
+      var styleTrait = serie.cle === "verse" ? ' stroke-width="2" stroke-dasharray="5 4"' : (serie.cle === "reel" ? ' stroke-width="2.75"' : ' stroke-width="2.4"');
+      s += '<polyline fill="none" stroke="' + serie.couleur + '"' + styleTrait + ' stroke-linecap="round" stroke-linejoin="round" points="' + pts + '"/>';
+      s += '<circle cx="' + x(n).toFixed(1) + '" cy="' + y(serie.valeurs[n]).toFixed(1) + '" r="4" fill="' + serie.couleur + '" stroke="var(--carte)" stroke-width="2"/>';
+    });
+
+    /* Curseur et marqueurs dynamiques */
+    s += '<line id="curseur" y1="' + G.t + '" y2="' + (G.h - G.b) + '" stroke="var(--doux)" stroke-width="1.2" stroke-dasharray="3 3" visibility="hidden"/>';
+    series.forEach(function (serie) {
+      s += '<circle id="pt-' + serie.cle + '" r="4.5" fill="' + serie.couleur + '" stroke="var(--carte)" stroke-width="2" visibility="hidden"/>';
+    });
+    s += '<rect id="zone" x="' + G.l + '" y="' + G.t + '" width="' + (G.w - G.l - G.r) + '" height="' + (G.h - G.t - G.b) + '" fill="transparent"/>';
+    svg.innerHTML = s;
+
+    etatGraphique = { r: r, p: p, n: n, series: series, x: x, y: y, indexActif: null };
+    var zone = $("zone");
+    function depuisClientX(clientX) {
+      var rect = svg.getBoundingClientRect(), echelle = rect.width > 0 ? G.w / rect.width : 1;
+      var px = (clientX - rect.left) * echelle;
+      var k = Math.round((px - G.l) / (G.w - G.l - G.r) * n);
+      afficherPointGraphique(k);
+    }
+    zone.addEventListener("mousemove", function (evt) { depuisClientX(evt.clientX); });
+    zone.addEventListener("touchmove", function (evt) {
+      if (evt.touches && evt.touches[0]) depuisClientX(evt.touches[0].clientX);
+    }, { passive: true });
+    zone.addEventListener("mouseleave", cacherPointGraphique);
+  }
+
+  function exporterCsv() {
+    if (!dernier) return;
+    var p = dernier.p, t = dernier.r.totaux;
+    var lignes = [
+      ["Simulation DCA"],
+      ["Date de départ", dateFr(p.dateDebut)], ["Date de fin", dateFr(p.dateFin)],
+      ["Versement initial (€)", nombreCsv.format(p.versementInitial)],
+      ["Versement régulier (€)", nombreCsv.format(p.versementRegulier)], ["Fréquence", LIBELLES_FREQUENCE[p.frequence] || p.frequence],
+      ["Rendement annuel (%)", nombreCsv.format(p.rendementAnnuel * 100)],
+      ["Inflation annuelle (%)", nombreCsv.format(t.inflationAnnuelle * 100)], ["Inflation cumulée (%)", nombreCsv.format(t.inflationCumulee * 100)],
+      [],
+      ["Année", "Mois", "Échéance de fin d'année", "Versé dans l'année (€)", "Versé cumulé (€)", "Intérêts de l'année (€)", "Valeur nominale (€)", "Valeur réelle (€)"]
+    ];
+    dernier.lignes.forEach(function (l) {
+      lignes.push([l.annee, l.mois, dateFr(l.date), nombreCsv.format(l.verse), nombreCsv.format(l.verseCumule), nombreCsv.format(l.interets), nombreCsv.format(l.valeur), nombreCsv.format(l.valeurReelle)]);
+    });
+    lignes.push([]);
+    lignes.push(["Total versé (€)", nombreCsv.format(t.totalVerse)], ["Valeur finale (€)", nombreCsv.format(t.valeurFinale)],
+      ["Gain nominal (€)", nombreCsv.format(t.gain)], ["Gain réel (€)", nombreCsv.format(t.gainReel)]);
+    var texte = "\ufeff" + lignes.map(function (l) { return l.map(function (c) { c = String(c); return /[;"\n]/.test(c) ? '"' + c.replace(/"/g, '""') + '"' : c; }).join(";"); }).join("\r\n");
+    var lien = document.createElement("a");
+    lien.href = URL.createObjectURL(new Blob([texte], { type: "text/csv;charset=utf-8" }));
+    lien.download = "simulation-dca-" + aujourdHui().replace(/-/g, "") + ".csv";
+    document.body.appendChild(lien); lien.click(); lien.remove();
+    setTimeout(function () { URL.revokeObjectURL(lien.href); }, 1000);
+  }
+
+  function majLibelleInflation() {
+    var cumul = document.querySelector("input[name=modeInflation]:checked").value === "cumulee";
+    $("libelle-inflation").textContent = cumul ? "Inflation cumulée sur la période (%)" : "Inflation annuelle (%)";
+    $("aide-inflation").textContent = cumul ? "Hausse totale des prix entre les deux dates (ex. 21,9 % sur 10 ans)." : "Hausse moyenne des prix chaque année (ex. 2 %).";
+  }
+
+  function viderResultats() {
+    dernier = null;
+    etatGraphique = null;
+    $("synthese").innerHTML = '<div class="carte kpi"><div class="libelle">Résultats</div><div class="detail">Corrigez la saisie signalée pour relancer le calcul.</div></div>';
+    if ($("decomposition")) { $("decomposition").hidden = true; $("decomposition").innerHTML = ""; }
+    $("graphique").innerHTML = ""; $("bulle").hidden = true; $("corps-tableau").innerHTML = "";
+    $("alerte-perte").hidden = true; $("export").disabled = true;
+  }
+
+  function calculer() {
+    effacerErreurs();
+    var p;
+    try {
+      p = lireParametres();
+      var r = Moteur.simuler(p);
+    } catch (e) {
+      var message = e && e.message ? e.message : String(e);
+      var champ = e && e.champ ? e.champ
+        : /date de fin|période|postérieure/.test(message) ? "dateFin"
+        : /date de départ/.test(message) ? "dateDebut"
+        : /rendement/i.test(message) ? "rendement"
+        : /inflation/i.test(message) ? "inflation" : null;
+      if (champ) { $(champ).setAttribute("aria-invalid", "true"); $("err-" + champ).textContent = message; }
+      else { $("err-general").textContent = message; }
+      viderResultats();
+      return;
+    }
+    var lignes = parAnnee(r, p);
+    dernier = { p: p, r: r, lignes: lignes };
+    $("export").disabled = false;
+    afficherSynthese(r, p);
+    afficherGraphique(r, p);
+    afficherTableau(lignes);
+  }
+
+  var minuterie = null;
+  function planifier() { clearTimeout(minuterie); minuterie = setTimeout(function () { minuterie = null; calculer(); }, 250); }
+  /* Export : annule le recalcul différé et recalcule tout de suite depuis la saisie courante,
+     pour que le fichier corresponde à l'écran. Saisie invalide : résultats effacés, aucun téléchargement. */
+  function exporterAJour() { clearTimeout(minuterie); minuterie = null; calculer(); exporterCsv(); }
+
+  $("dateDebut").value = aujourdHui();
+  $("dateFin").value = plusAnnees(aujourdHui(), 10);
+  majLibelleInflation();
+  $("formulaire").addEventListener("input", planifier);
+  $("formulaire").addEventListener("change", function (e) { if (e.target.name === "modeInflation") majLibelleInflation(); planifier(); });
+  $("formulaire").addEventListener("submit", function (e) { e.preventDefault(); calculer(); });
+  $("export").addEventListener("click", exporterAJour);
+  $("graphique").addEventListener("keydown", function (e) {
+    if (!etatGraphique) return;
+    var pas = e.shiftKey ? 12 : 1;
+    var cur = etatGraphique.indexActif === null ? etatGraphique.n : etatGraphique.indexActif;
+    if (e.key === "ArrowRight") { e.preventDefault(); afficherPointGraphique(cur + pas); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); afficherPointGraphique(cur - pas); }
+    else if (e.key === "Home") { e.preventDefault(); afficherPointGraphique(0); }
+    else if (e.key === "End") { e.preventDefault(); afficherPointGraphique(etatGraphique.n); }
+    else if (e.key === "Escape") { e.preventDefault(); cacherPointGraphique(); }
+  });
+  $("graphique").addEventListener("blur", cacherPointGraphique);
+  var largeurPrecedente = 0;
+  window.addEventListener("resize", function () {
+    var l = $("graphique").parentNode.clientWidth;
+    if (dernier && Math.abs(l - largeurPrecedente) > 4) { largeurPrecedente = l; afficherGraphique(dernier.r, dernier.p); }
+  });
+  calculer();
+})();
+</script>
+<script id="theme">
+"use strict";
+/* Thème (décision 008) : sombre à chaque ouverture, bouton « Mode clair » pour basculer. Aucune mémorisation. */
+(function () {
+  var racine = document.documentElement, bouton = document.getElementById("bascule-theme");
+  function appliquer(clair) {
+    racine.setAttribute("data-theme", clair ? "clair" : "sombre");
+    bouton.setAttribute("aria-pressed", clair ? "true" : "false");
+  }
+  bouton.addEventListener("click", function () { appliquer(racine.getAttribute("data-theme") !== "clair"); });
+  appliquer(false);
+  bouton.hidden = false;
+})();
+</script>
+</body>
+</html>
