@@ -642,7 +642,9 @@ button.bouton-secondaire[aria-pressed="true"]{border-color:var(--accent);backgro
 .note .tete-repli h2{margin:0;min-width:0}
 .note.replie .tete-repli{margin-bottom:0}
 button.bouton-repli{flex:none;font-size:.78rem;padding:5px 12px;min-height:32px}
-.contenu-repli[hidden]{display:none}
+/* 0.3.1 (R3) : hidden="until-found" garde le contenu trouvable par Ctrl+F (le navigateur le masque par content-visibility) ;
+   seul l'attribut hidden ordinaire (navigateurs sans until-found) passe par display:none. */
+.contenu-repli[hidden]:not([hidden="until-found"]){display:none}
 
 @media (max-width:520px){
   main{padding:16px 12px 40px}
@@ -675,7 +677,7 @@ button.bouton-repli{flex:none;font-size:.78rem;padding:5px 12px;min-height:32px}
   .tableau-defile{max-height:none;overflow:visible;border:1px solid #cbd5d7}
   thead th{position:static}
   .bouton-repli{display:none !important}
-  .contenu-repli[hidden]{display:block !important}
+  .contenu-repli[hidden]{display:block !important;content-visibility:visible !important}
   .note.replie .tete-repli{margin-bottom:14px}
 }
 </style>
@@ -2453,7 +2455,7 @@ if (typeof module !== "undefined") module.exports = Xlsx;
     return [{ nom: "Fourchette", lignes: l, colonnes: [44, 22, 22, 22, 20, 20, 20, 20, 20, 22, 22, 22] }];
   }
   /* Lot L6.1b : export Excel (XLSX), écrit par le bloc <script id="xlsx"> ; mêmes règles que le CSV (voir exporterAJour). */
-  var VERSION_APPLI = "0.3.0";
+  var VERSION_APPLI = "0.3.1";
   var AVERTISSEMENT_XLSX = "Simulation, pas un conseil. Les résultats reposent sur un rendement et une inflation constants, " +
     "saisis par l'utilisateur : ce ne sont pas des prévisions, et les rendements passés ne préjugent pas des rendements futurs.";
   /* Lot L6.2 : avertissement fiscal des exports (même sens que #avertissement-fiscal). */
@@ -2924,6 +2926,7 @@ if (typeof module !== "undefined") module.exports = Donnees;
    en-tête, et le reste dans un bloc masqué par l'attribut hidden. Le texte reste dans le DOM ; à l'impression, tout est déplié.
    Une ancre vers un élément d'une section repliée la déplie. */
 (function () {
+  var RECHERCHE_REPLIEE = "onbeforematch" in document.body;
   function repliable(id) {
     var s = document.getElementById(id), h = s && s.querySelector("h2");
     if (!h) return null;
@@ -2934,11 +2937,19 @@ if (typeof module !== "undefined") module.exports = Donnees;
     b.setAttribute("aria-controls", contenu.id); b.setAttribute("aria-describedby", h.id);
     while (h.nextSibling) contenu.appendChild(h.nextSibling);
     s.insertBefore(tete, h); tete.appendChild(h); tete.appendChild(b); s.appendChild(contenu);
+    var ouverte = false;
     function regler(ouvert) {
-      contenu.hidden = !ouvert; s.classList.toggle("replie", !ouvert);
+      ouverte = ouvert;
+      /* 0.3.1 (R3) : repliée, la section reste trouvable par la recherche du navigateur (hidden="until-found") ; sinon hidden ordinaire. */
+      if (ouvert) contenu.removeAttribute("hidden");
+      else if (RECHERCHE_REPLIEE) contenu.setAttribute("hidden", "until-found");
+      else contenu.hidden = true;
+      s.classList.toggle("replie", !ouvert);
       b.setAttribute("aria-expanded", ouvert ? "true" : "false"); b.textContent = ouvert ? "Replier" : "Déployer";
     }
-    b.addEventListener("click", function () { regler(contenu.hidden); });
+    b.addEventListener("click", function () { regler(!ouverte); });
+    /* Occurrence trouvée par Ctrl+F (ou fragment de texte) : le navigateur retire hidden et prévient par beforematch. */
+    contenu.addEventListener("beforematch", function () { regler(true); });
     regler(false);
     return { section: s, regler: regler };
   }

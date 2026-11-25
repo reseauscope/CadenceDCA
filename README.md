@@ -23,7 +23,7 @@ Aucune installation n'est nécessaire.
   - Si la période est passée et couverte par la série intégrée (de 1999 à 2025, en moyennes annuelles), il remplit une approximation de l'inflation cumulée, en mode « Cumul sur la période » : elle va de la moyenne annuelle de l'année de départ à celle de l'année de fin, sans tenir compte des mois.
   - Sinon, il propose la moyenne annuelle des 10 ou des 20 dernières années. C'est l'inflation passée, pas une prévision.
   - La série est intégrée à la page : aucune connexion n'est nécessaire.
-- **Sources.** La section « Sources des données », en bas de la page, cite chaque source avec sa date. Elle est repliée par défaut, comme « À quoi sert CadenceDCA ? » : le bouton « Déployer » (souris, ou touche Entrée ou Espace) l'ouvre, « Replier » la referme. À l'impression, les deux sections sont imprimées en entier.
+- **Sources.** La section « Sources des données », en bas de la page, cite chaque source avec sa date. Elle est repliée par défaut, comme « À quoi sert CadenceDCA ? » : le bouton « Déployer » (souris, ou touche Entrée ou Espace) l'ouvre, « Replier » la referme. La recherche du navigateur (Ctrl+F) trouve aussi le texte d'une section repliée et l'ouvre (version 0.3.1 ; navigateurs récents). À l'impression, les deux sections sont imprimées en entier.
 
 ## Fourchette de résultats (Monte-Carlo)
 
@@ -98,4 +98,4 @@ Ce que permet l'outil, comment lire ses résultats et ses limites : voir `note-e
 
 ## Version
 
-Version actuelle : 0.3.0. Détail : `CadenceDCA-0.3.0.md` ; versions précédentes : `CadenceDCA-0.2.1.md`, `CadenceDCA-0.2.0.md`.
+Version actuelle : 0.3.1 (correctif). Détail : `CadenceDCA-0.3.1.md` ; versions précédentes : `CadenceDCA-0.3.0.md`, `CadenceDCA-0.2.1.md`, `CadenceDCA-0.2.0.md`.
