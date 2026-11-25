@@ -48,6 +48,10 @@
   --ombre:0 1px 2px rgba(17,19,20,.05),0 10px 26px -14px rgba(17,19,20,.10);
   --ombre-bulle:0 12px 28px -6px rgba(17,19,20,.18),0 2px 6px rgba(17,19,20,.08);
   --sur-accent:#ffffff;
+  /* Lot L6.3 : scénario B. Peach Red #f15a30 (Wada n° 340), déclinaison AA claire #c23b16 (celle de --perte) */
+  --scenario-b:#c23b16;
+  /* Lot L6.4 : fourchette Monte-Carlo. Neutral Gray #b6bfc1 (Wada n° 340) à 8 % : toutes les courbes restent ≥ 4,5:1 */
+  --bande-mc:rgba(182,191,193,.08);
   --rayon:14px;
   --rayon-petit:9px;
 }
@@ -86,6 +90,8 @@
     --ombre:0 1px 0 rgba(255,255,255,.04) inset,0 14px 32px -14px rgba(0,0,0,.65);
     --ombre-bulle:0 14px 32px -6px rgba(0,0,0,.75);
     --sur-accent:#111314;
+    --scenario-b:#f15a30;
+    --bande-mc:rgba(182,191,193,.08);
   }
 }
 *{box-sizing:border-box}
@@ -450,6 +456,8 @@ legend{
 /* Tableau annuel avec en-tête fixe et lignes alternées */
 .entete-section{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
 .entete-section h2{margin:0}
+/* Lot L6.1b : boutons d'export CSV et Excel côte à côte */
+.actions-export{display:flex;flex-wrap:wrap;gap:8px}
 .tableau-defile{
   overflow:auto;
   max-height:520px; /* 0.2.1 (C1) : en-têtes sur deux ou trois lignes + 10 lignes par défaut entièrement visibles */
@@ -506,6 +514,121 @@ button.bascule-theme:hover:not(:disabled){background:var(--carte-subtile);box-sh
 :root[data-theme="clair"] button.bascule-theme{border-color:var(--accent)}
 button.bascule-theme[hidden]{display:none}
 
+/* Lot L6.1 : profils de rendement, inflation Insee, sources (variables de la palette existante uniquement) */
+button.bouton-secondaire{background:var(--carte);color:var(--texte);border:1px solid var(--bord-champ);font-size:.82rem;padding:7px 10px;justify-content:center}
+button.bouton-secondaire:hover:not(:disabled){background:var(--carte-subtile);border-color:var(--accent);box-shadow:none}
+button.bouton-secondaire[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-doux);box-shadow:inset 0 0 0 1px var(--accent)}
+.sous-etiquette{font-size:.8rem;font-weight:600;margin:12px 0 6px;color:var(--texte)}
+.boutons-profils{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.boutons-profils button{flex-direction:column;gap:1px;padding:7px 4px;line-height:1.25;text-align:center}
+.profil-taux{font-weight:700;font-variant-numeric:tabular-nums}
+.avertissement{font-size:.79rem;line-height:1.4;color:var(--texte);margin:8px 0 0;padding:8px 10px;border-left:3px solid var(--inflation);background:var(--inflation-doux);border-radius:6px}
+.insee{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.insee-moyennes{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.insee-moyennes[hidden]{display:none}
+.insee .aide:empty{display:none}
+#sources p,#sources li{overflow-wrap:anywhere}
+.sources-serie{margin:6px 0 0}
+.sources-serie summary{cursor:pointer;font-weight:600;color:var(--texte)}
+.sources-serie table{width:auto;margin-top:8px}
+.sources-serie th,.sources-serie td{padding:4px 12px}
+
+/* Lot L6.2 : frais et fiscalité (variables de la palette existante uniquement) */
+.details-taux{margin-top:10px;border:1px solid var(--bord);border-radius:9px;padding:8px 10px;background:var(--carte-subtile)}
+.details-taux summary{cursor:pointer;font-size:.82rem;font-weight:600;color:var(--texte)}
+.details-taux[open] summary{margin-bottom:10px}
+.champ[hidden]{display:none}
+.tableau-fiscal{overflow-x:auto;border:1px solid var(--bord);border-radius:10px;margin-bottom:12px}
+.tableau-fiscal table{font-size:.86rem}
+.tableau-fiscal th:first-child,.tableau-fiscal td:first-child{white-space:normal;min-width:7.5em}
+.tableau-fiscal tbody td:last-child{font-weight:600;color:var(--texte)}
+.tableau-fiscal tr.etape-total td{font-weight:700;color:var(--texte);background:var(--accent-doux)}
+.tableau-fiscal tr.etape-gain td{font-weight:700;color:var(--texte)}
+.tableau-fiscal tr.etape-gain td.positif{color:var(--reel)}
+.tableau-fiscal tr.etape-gain td.negatif{color:var(--perte)}
+.fiscal-regime{font-size:.86rem;margin:0 0 12px;color:var(--texte)}
+.fiscal-detail{font-size:.8rem;color:var(--doux);margin:0 0 10px}
+.fiscal-alertes{display:flex;flex-direction:column;gap:8px;margin-bottom:8px}
+.fiscal-alertes:empty{display:none}
+.fiscal-alertes .avertissement{margin:0}
+@media (max-width:420px){
+  #groupe-frais-fiscalite .ligne{row-gap:0;margin-bottom:12px}
+}
+/* Téléphone : chaque étape sur deux rangées (libellé, puis nominal et réel), sans défilement horizontal. */
+@media (max-width:460px){
+  .tableau-fiscal tr{display:grid;grid-template-columns:1fr 1fr}
+  .tableau-fiscal thead th:first-child{display:none}
+  .tableau-fiscal td:first-child{grid-column:1/-1;border-bottom:none;padding-bottom:2px}
+  .tableau-fiscal th,.tableau-fiscal td{padding-left:10px;padding-right:10px}
+}
+
+/* Lot L6.3 : comparaison A/B. Couleur de B : --scenario-b (Peach Red, combinaison Wada n° 340). B se distingue aussi
+   par le trait (tirets longs, pointillés), par des marqueurs carrés et par ses libellés : jamais par la seule couleur. */
+.interrupteur{display:flex;align-items:center;gap:9px;font-size:.88rem;font-weight:600;cursor:pointer;margin:0;color:var(--texte)}
+.interrupteur input{width:18px;height:18px;min-width:18px;padding:0;margin:0;accent-color:var(--accent);flex:0 0 auto;cursor:pointer}
+.interrupteur input:focus-visible{outline:2px solid var(--texte);outline-offset:2px}
+.panneau-b{margin-top:10px;padding:10px 12px 12px;border:1px solid var(--bord);border-left:3px dashed var(--scenario-b);border-radius:9px;background:var(--carte-subtile)}
+.panneau-b[hidden]{display:none}
+.panneau-b .sous-etiquette:first-child{margin-top:0}
+.boutons-raccourcis{display:grid;grid-template-columns:1fr;gap:6px}
+.panneau-b .aide:empty{display:none}
+.panneau-b #recopier-a{margin-top:10px}
+.pastille-b{display:inline-block;width:18px;height:0;border-top:3px dashed var(--scenario-b);vertical-align:middle;margin-left:6px}
+.legende-item[hidden],.comparaison-ab[hidden],.note-ab[hidden]{display:none}
+.legende-trait.tirets-longs{width:20px;background:repeating-linear-gradient(90deg,var(--c) 0 7px,transparent 7px 10px)}
+.legende-trait.pointilles{width:20px;height:4px;background:radial-gradient(circle,var(--c) 0 1.6px,transparent 1.9px) 0 50%/5px 4px repeat-x}
+.bulle-carre{width:8px;height:8px;display:inline-block;border-radius:1px}
+.note-ab{font-size:.79rem;color:var(--doux);margin:8px 0 0;line-height:1.4}
+.ab-differences{font-size:.86rem;margin:0 0 12px;color:var(--texte)}
+.ab-conclusion{font-size:.86rem;font-weight:600;margin:0 0 8px;color:var(--texte)}
+.tableau-ab{overflow-x:auto;border:1px solid var(--bord);border-radius:10px;margin-bottom:12px}
+.tableau-ab table{font-size:.86rem}
+.tableau-ab tbody th{text-align:left;font-weight:650;color:var(--texte);white-space:normal;min-width:8em;padding:10px 12px;border-bottom:1px solid var(--bord);font-size:inherit;text-transform:none;letter-spacing:0}
+.tableau-ab tbody td,.tableau-ab tbody td:first-child{font-weight:600;color:var(--texte);text-align:right}
+.tableau-ab tbody td:last-child{font-weight:700;color:var(--texte)}
+.tableau-ab tbody tr:nth-child(even) th{background:var(--carte-subtile)}
+.tableau-ab tbody tr:last-child th{border-bottom:none}
+.tableau-ab .etiq-m{display:none}
+/* Téléphone : un bloc par résultat (libellé, puis A, B et l'écart, chacun nommé), sans défilement horizontal. */
+@media (max-width:560px){
+  .tableau-ab thead{display:none}
+  .tableau-ab tr{display:block;padding:8px 10px;border-bottom:1px solid var(--bord)}
+  .tableau-ab tbody tr:last-child{border-bottom:none}
+  .tableau-ab tbody th{display:block;padding:0 0 4px;border:none;min-width:0;background:transparent !important}
+  .tableau-ab tbody td,.tableau-ab tbody td:first-child{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:2px 0;border:none;white-space:normal;background:transparent !important}
+  .tableau-ab tbody tr:nth-child(even){background:var(--carte-subtile)}
+  .tableau-ab .etiq-m{display:inline;color:var(--doux);font-weight:600;text-align:left}
+}
+
+/* Lot L6.4 : fourchette Monte-Carlo (variables de la palette existante ; zone : Neutral Gray, Wada n° 340).
+   La fourchette se lit sans la couleur : zone bornée par deux traits pointillés, médiane en trait mixte, libellés. */
+.panneau-mc{margin-top:10px;padding:10px 12px 12px;border:1px solid var(--bord);border-radius:9px;background:var(--carte-subtile)}
+.panneau-mc[hidden],.fourchette-mc[hidden]{display:none}
+.panneau-mc .sous-etiquette:first-child{margin-top:0}
+.panneau-mc .aide:empty{display:none}
+.legende-trait.zone-mc{width:18px;height:10px;border-radius:2px;background:var(--bande-mc);border-top:1px dotted var(--doux);border-bottom:1px dotted var(--doux)}
+.legende-trait.mediane-mc{width:20px;height:2px;background:repeating-linear-gradient(90deg,var(--c) 0 6px,transparent 6px 8px,var(--c) 8px 10px,transparent 10px 12px)}
+.mc-explication{font-size:.86rem;margin:0 0 12px;color:var(--texte)}
+.mc-detail{font-size:.8rem;color:var(--doux);margin:0 0 10px;line-height:1.45}
+.tableau-mc{overflow-x:auto;border:1px solid var(--bord);border-radius:10px;margin-bottom:12px}
+.tableau-mc table{font-size:.86rem}
+.tableau-mc tbody th{text-align:left;font-weight:650;color:var(--texte);white-space:normal;min-width:8em;padding:10px 12px;border-bottom:1px solid var(--bord);font-size:inherit;text-transform:none;letter-spacing:0}
+.tableau-mc tbody td,.tableau-mc tbody td:first-child{font-weight:600;color:var(--texte);text-align:right}
+.tableau-mc tbody td:last-child{font-weight:600;color:var(--texte)}
+.tableau-mc tbody tr:nth-child(even) th{background:var(--carte-subtile)}
+.tableau-mc tbody tr:last-child th{border-bottom:none}
+.tableau-mc .etiq-m{display:none}
+/* Téléphone : un bloc par résultat (libellé, puis pessimiste, médiane et optimiste, chacun nommé), sans défilement horizontal. */
+@media (max-width:560px){
+  .tableau-mc thead{display:none}
+  .tableau-mc tr{display:block;padding:8px 10px;border-bottom:1px solid var(--bord)}
+  .tableau-mc tbody tr:last-child{border-bottom:none}
+  .tableau-mc tbody th{display:block;padding:0 0 4px;border:none;min-width:0;background:transparent !important}
+  .tableau-mc tbody td,.tableau-mc tbody td:first-child{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:2px 0;border:none;white-space:normal;background:transparent !important}
+  .tableau-mc tbody tr:nth-child(even){background:var(--carte-subtile)}
+  .tableau-mc .etiq-m{display:inline;color:var(--doux);font-weight:600;text-align:left}
+}
+
 /* Note explicative */
 .note{padding:24px 26px}
 .note h2{margin-bottom:14px}
@@ -513,6 +636,13 @@ button.bascule-theme[hidden]{display:none}
 .note ul{margin:0 0 14px;padding-left:20px;max-width:84ch}
 .note li{margin-bottom:6px;color:var(--texte)}
 .note p:last-child{margin-bottom:0}
+/* Sections repliables (demande de Jean, 25/11/2026) : #note et #sources repliées par défaut ; en-tête titre + bouton Déployer / Replier
+   construit par le bloc <script id="repli"> (sans script, tout reste déplié). */
+.tete-repli{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.note .tete-repli h2{margin:0;min-width:0}
+.note.replie .tete-repli{margin-bottom:0}
+button.bouton-repli{flex:none;font-size:.78rem;padding:5px 12px;min-height:32px}
+.contenu-repli[hidden]{display:none}
 
 @media (max-width:520px){
   main{padding:16px 12px 40px}
@@ -534,16 +664,19 @@ button.bascule-theme[hidden]{display:none}
     --accent:#007a69;--accent-survol:#006355;--accent-doux:#eafaf6;
     --verse:#475255;--nominal:#111314;--reel:#007a69;--reel-doux:#eafaf6;
     --perte:#c23b16;--perte-doux:#fef1ec;--inflation:#c23b16;--inflation-doux:#fef1ec;
-    --grille:#cbd5d7;--sur-accent:#ffffff;--ombre:none;--ombre-bulle:none;
+    --grille:#cbd5d7;--sur-accent:#ffffff;--ombre:none;--ombre-bulle:none;--scenario-b:#c23b16;--bande-mc:rgba(182,191,193,.25);
   }
   body{background:#ffffff !important;color:#111314 !important;font-size:11pt}
   main{max-width:none;padding:0}
-  .badge-local,#export,.aide-clavier,.bulle,.bascule-theme{display:none !important}
+  .badge-local,#export,#export-xlsx,.aide-clavier,.bulle,.bascule-theme,.boutons-profils,.insee,#taux-defaut,.boutons-raccourcis,#recopier-a{display:none !important}
   .grille{display:block}
   #formulaire{position:static;margin-bottom:16px}
   .carte{box-shadow:none !important;break-inside:avoid;margin-bottom:14px}
   .tableau-defile{max-height:none;overflow:visible;border:1px solid #cbd5d7}
   thead th{position:static}
+  .bouton-repli{display:none !important}
+  .contenu-repli[hidden]{display:block !important}
+  .note.replie .tete-repli{margin-bottom:14px}
 }
 </style>
 </head>
@@ -612,7 +745,76 @@ button.bascule-theme[hidden]{display:none}
 
   <div class="groupe-form">
     <p class="etiquette-groupe">Hypothèse de rendement</p>
-    <div class="champ"><label for="rendement">Rendement annuel (%)</label><input type="text" inputmode="decimal" id="rendement" aria-describedby="aide-rendement err-rendement" value="5"><div class="aide" id="aide-rendement">Rendement moyen espéré, net de frais.</div><div class="erreur" id="err-rendement"></div></div>
+    <div class="champ"><label for="rendement">Rendement annuel (%)</label><input type="text" inputmode="decimal" id="rendement" aria-describedby="aide-rendement aide-profil err-rendement" value="5"><div class="aide" id="aide-rendement">Rendement moyen espéré, avant les frais et l'impôt saisis plus bas.</div><div class="erreur" id="err-rendement"></div></div>
+    <div class="profils" role="group" aria-labelledby="titre-profils">
+      <p class="sous-etiquette" id="titre-profils">Profils préremplis</p>
+      <div class="boutons-profils">
+        <button type="button" class="bouton-secondaire" data-profil="prudent" aria-pressed="false"><span class="profil-nom">Prudent</span><span class="profil-taux">1,7&nbsp;%</span></button>
+        <button type="button" class="bouton-secondaire" data-profil="modere" aria-pressed="false"><span class="profil-nom">Modéré</span><span class="profil-taux">2,63&nbsp;%</span></button>
+        <button type="button" class="bouton-secondaire" data-profil="dynamique" aria-pressed="false"><span class="profil-nom">Dynamique</span><span class="profil-taux">5&nbsp;%</span></button>
+      </div>
+      <p class="aide" id="aide-profil" aria-live="polite"></p>
+      <p class="avertissement" id="avertissement-profils"><strong>Simulation, pas un conseil.</strong> Les profils sont des hypothèses de rendement constantes et sourcées (voir «&nbsp;Sources des données&nbsp;»), pas des prévisions&nbsp;: les marchés varient, et les rendements passés ne préjugent pas des rendements futurs.</p>
+    </div>
+  </div>
+
+  <div class="groupe-form" id="groupe-fourchette">
+    <p class="etiquette-groupe">Fourchette de résultats</p>
+    <label class="interrupteur" for="fourchette"><input type="checkbox" id="fourchette" role="switch" aria-controls="panneau-mc" aria-describedby="aide-fourchette"><span>Afficher une fourchette (Monte-Carlo)</span></label>
+    <div class="aide" id="aide-fourchette">Le résultat n'est pas certain&nbsp;: 1&nbsp;000 suites de rendements annuels sont tirées autour du rendement ci-dessus, toujours les mêmes pour les mêmes paramètres.</div>
+    <div class="panneau-mc" id="panneau-mc" hidden>
+      <p class="sous-etiquette" id="titre-profils-mc">Profils de la fourchette (rendement moyen · volatilité σ)</p>
+      <p class="aide" id="aide-profils-mc">Un profil remplit aussi le rendement annuel ci-dessus&nbsp;; le changement est indiqué sous les boutons.</p>
+      <div class="boutons-profils" role="group" aria-labelledby="titre-profils-mc" aria-describedby="aide-profils-mc">
+        <button type="button" class="bouton-secondaire" id="mc-obligataire" data-profil-mc="obligataire" aria-pressed="false"><span class="profil-nom">Obligataire</span><span class="profil-taux">2,5&nbsp;% · σ&nbsp;4&nbsp;%</span></button>
+        <button type="button" class="bouton-secondaire" id="mc-equilibre" data-profil-mc="equilibre" aria-pressed="false"><span class="profil-nom">Équilibré</span><span class="profil-taux">4&nbsp;% · σ&nbsp;9&nbsp;%</span></button>
+        <button type="button" class="bouton-secondaire" id="mc-actions" data-profil-mc="actions" aria-pressed="false"><span class="profil-nom">Actions monde</span><span class="profil-taux">5&nbsp;% · σ&nbsp;16&nbsp;%</span></button>
+      </div>
+      <p class="aide" id="aide-profil-mc" aria-live="polite"></p>
+      <div class="champ"><label for="volatilite">Volatilité annuelle (%)</label><input type="text" inputmode="decimal" id="volatilite" aria-describedby="aide-volatilite err-volatilite" value="16"><div class="aide" id="aide-volatilite">Écart habituel du rendement d'une année autour de sa moyenne. 0&nbsp;: rendement constant, la fourchette se réduit à la courbe.</div><div class="erreur" id="err-volatilite"></div></div>
+    </div>
+  </div>
+
+  <div class="groupe-form" id="groupe-frais-fiscalite">
+    <p class="etiquette-groupe">Frais &amp; fiscalité</p>
+    <div class="ligne">
+      <div class="champ"><label for="fraisEntree">Frais d'entrée (%)</label><input type="text" inputmode="decimal" id="fraisEntree" aria-describedby="aide-fraisEntree err-fraisEntree" value="0"><div class="aide" id="aide-fraisEntree">Retenus sur chaque versement.</div><div class="erreur" id="err-fraisEntree"></div></div>
+      <div class="champ"><label for="fraisGestion">Frais de gestion annuels (%)</label><input type="text" inputmode="decimal" id="fraisGestion" aria-describedby="aide-fraisGestion err-fraisGestion" value="0"><div class="aide" id="aide-fraisGestion">Sur l'encours, 1/12 chaque mois. Le profil «&nbsp;Modéré&nbsp;» est déjà net de frais de gestion&nbsp;: ne les saisissez pas en plus.</div><div class="erreur" id="err-fraisGestion"></div></div>
+    </div>
+    <div class="champ"><label for="enveloppe">Enveloppe fiscale</label>
+      <select id="enveloppe" aria-describedby="aide-enveloppe">
+        <option value="brut" selected>Aucune fiscalité (brut)</option>
+        <option value="pea">PEA</option>
+        <option value="cto">Compte-titres (PFU)</option>
+        <option value="assurance-vie">Assurance-vie</option>
+        <option value="exonere">Exonéré (Livret A, LDDS)</option>
+      </select><div class="aide" id="aide-enveloppe">Impôt calculé sur la plus-value, en sortie totale à la date de fin.</div></div>
+    <div class="champ" id="champ-foyer" hidden><label for="foyer">Abattement assurance-vie<span id="foyer-commun" hidden>, commun à A et B</span></label>
+      <select id="foyer">
+        <option value="seul" selected>Personne seule (4 600 €)</option>
+        <option value="couple">Couple soumis à imposition commune (9 200 €)</option>
+      </select></div>
+    <details class="details-taux" id="details-taux">
+      <summary>Taux fiscaux utilisés (modifiables)</summary>
+      <div class="ligne">
+        <div class="champ"><label for="tauxIr">Impôt forfaitaire, PFU (%)</label><input type="text" inputmode="decimal" id="tauxIr" aria-describedby="err-tauxIr" value="12,8"><div class="erreur" id="err-tauxIr"></div></div>
+        <div class="champ"><label for="tauxPs">Prélèvements sociaux (%)</label><input type="text" inputmode="decimal" id="tauxPs" aria-describedby="err-tauxPs" value="18,6"><div class="erreur" id="err-tauxPs"></div></div>
+      </div>
+      <div class="ligne">
+        <div class="champ"><label for="tauxPsAv">Prélèvements sociaux, assurance-vie (%)</label><input type="text" inputmode="decimal" id="tauxPsAv" aria-describedby="err-tauxPsAv" value="17,2"><div class="erreur" id="err-tauxPsAv"></div></div>
+        <div class="champ"><label for="tauxAvReduit">Assurance-vie après 8 ans (%)</label><input type="text" inputmode="decimal" id="tauxAvReduit" aria-describedby="err-tauxAvReduit" value="7,5"><div class="erreur" id="err-tauxAvReduit"></div></div>
+      </div>
+      <div class="ligne">
+        <div class="champ"><label for="abattementSeul">Abattement, personne seule (€)</label><input type="text" inputmode="decimal" id="abattementSeul" aria-describedby="err-abattementSeul" value="4 600"><div class="erreur" id="err-abattementSeul"></div></div>
+        <div class="champ"><label for="abattementCouple">Abattement, couple (€)</label><input type="text" inputmode="decimal" id="abattementCouple" aria-describedby="err-abattementCouple" value="9 200"><div class="erreur" id="err-abattementCouple"></div></div>
+      </div>
+      <div class="ligne">
+        <div class="champ"><label for="seuilAv">Seuil de primes à 7,5 % (€)</label><input type="text" inputmode="decimal" id="seuilAv" aria-describedby="err-seuilAv" value="150 000"><div class="erreur" id="err-seuilAv"></div></div>
+        <div class="champ"><label for="plafondPea">Plafond de versements PEA (€)</label><input type="text" inputmode="decimal" id="plafondPea" aria-describedby="err-plafondPea" value="150 000"><div class="erreur" id="err-plafondPea"></div></div>
+      </div>
+      <p class="aide">Valeurs vérifiées le 25/11/2026 sur les sites officiels (voir «&nbsp;Sources des données&nbsp;»).</p>
+      <button type="button" class="bouton-secondaire" id="taux-defaut">Rétablir les taux vérifiés</button>
+    </details>
   </div>
 
   <fieldset>
@@ -622,13 +824,120 @@ button.bascule-theme[hidden]{display:none}
       <label><input type="radio" name="modeInflation" value="cumulee"> Cumul sur la période</label>
     </div>
     <div class="champ"><label for="inflation" id="libelle-inflation">Inflation annuelle (%)</label><input type="text" inputmode="decimal" id="inflation" aria-describedby="aide-inflation err-inflation" value="2"><div class="aide" id="aide-inflation"></div><div class="erreur" id="err-inflation"></div></div>
+    <div class="insee">
+      <button type="button" class="bouton-secondaire" id="bouton-insee">Inflation INSEE</button>
+      <div class="insee-moyennes" id="insee-moyennes" hidden>
+        <button type="button" class="bouton-secondaire" id="insee-moy10">Moyenne 10 ans</button>
+        <button type="button" class="bouton-secondaire" id="insee-moy20">Moyenne 20 ans</button>
+      </div>
+      <p class="aide" id="insee-message" role="status"></p>
+    </div>
   </fieldset>
+
+  <div class="groupe-form" id="groupe-comparaison">
+    <p class="etiquette-groupe">Comparaison A/B</p>
+    <label class="interrupteur" for="comparer"><input type="checkbox" id="comparer" role="switch" aria-controls="panneau-b" aria-describedby="aide-comparer"><span>Comparer avec un scénario B</span></label>
+    <div class="aide" id="aide-comparer">A&nbsp;: les paramètres ci-dessus. B&nbsp;: une copie de A, dont vous changez un ou plusieurs paramètres.</div>
+    <div class="panneau-b" id="panneau-b" hidden>
+      <p class="sous-etiquette" id="titre-raccourcis">Raccourcis préremplis</p>
+      <div class="boutons-raccourcis" role="group" aria-labelledby="titre-raccourcis">
+        <button type="button" class="bouton-secondaire" id="raccourci-unique">DCA ou versement unique</button>
+        <button type="button" class="bouton-secondaire" id="raccourci-frais">Frais 0,2&nbsp;% ou 1,5&nbsp;%</button>
+        <button type="button" class="bouton-secondaire" id="raccourci-rendement">Rendement 5&nbsp;% ou 7&nbsp;%</button>
+      </div>
+      <p class="aide" id="message-b" role="status"></p>
+      <p class="sous-etiquette">Scénario B<span class="pastille-b" aria-hidden="true"></span></p>
+      <div class="champ"><label for="versementInitialB">Versement initial B (€)</label><input type="text" inputmode="decimal" id="versementInitialB" aria-describedby="err-versementInitialB" value="1 000"><div class="erreur" id="err-versementInitialB"></div></div>
+      <div class="ligne">
+        <div class="champ"><label for="versementRegulierB">Versement régulier B (€)</label><input type="text" inputmode="decimal" id="versementRegulierB" aria-describedby="err-versementRegulierB" value="100"><div class="erreur" id="err-versementRegulierB"></div></div>
+        <div class="champ"><label for="frequenceB">Fréquence B</label>
+          <select id="frequenceB">
+            <option value="hebdomadaire">Hebdomadaire</option>
+            <option value="mensuelle" selected>Mensuelle</option>
+            <option value="trimestrielle">Trimestrielle</option>
+            <option value="annuelle">Annuelle</option>
+            <option value="aucune">Aucun versement</option>
+          </select></div>
+      </div>
+      <div class="champ"><label for="rendementB">Rendement annuel B (%)</label><input type="text" inputmode="decimal" id="rendementB" aria-describedby="err-rendementB" value="5"><div class="erreur" id="err-rendementB"></div></div>
+      <div class="ligne">
+        <div class="champ"><label for="fraisEntreeB">Frais d'entrée B (%)</label><input type="text" inputmode="decimal" id="fraisEntreeB" aria-describedby="err-fraisEntreeB" value="0"><div class="erreur" id="err-fraisEntreeB"></div></div>
+        <div class="champ"><label for="fraisGestionB">Frais de gestion B (%/an)</label><input type="text" inputmode="decimal" id="fraisGestionB" aria-describedby="err-fraisGestionB" value="0"><div class="erreur" id="err-fraisGestionB"></div></div>
+      </div>
+      <div class="champ"><label for="enveloppeB">Enveloppe fiscale B</label>
+        <select id="enveloppeB">
+          <option value="brut" selected>Aucune fiscalité (brut)</option>
+          <option value="pea">PEA</option>
+          <option value="cto">Compte-titres (PFU)</option>
+          <option value="assurance-vie">Assurance-vie</option>
+          <option value="exonere">Exonéré (Livret A, LDDS)</option>
+        </select></div>
+      <p class="aide">Communs à A et B&nbsp;: dates, inflation, abattement de l'assurance-vie et taux fiscaux.</p>
+      <button type="button" class="bouton-secondaire" id="recopier-a">Recopier A dans B</button>
+    </div>
+  </div>
   <div class="erreur" id="err-general" role="alert"></div>
 </form>
 
 <div>
   <div class="alerte" id="alerte-perte" hidden role="status"></div>
   <div class="synthese" id="synthese"></div>
+
+  <section class="carte comparaison-ab" id="comparaison-ab" aria-labelledby="titre-comparaison" hidden>
+    <h2 id="titre-comparaison">
+      <svg class="titre-icone" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="7" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="17" y2="20" stroke-dasharray="3 3"/><polyline points="3 9 7 4 11 9"/><polyline points="13 15 17 20 21 15"/>
+      </svg>
+      Comparaison A/B
+    </h2>
+    <p class="ab-differences" id="ab-differences"></p>
+    <div class="fiscal-alertes" id="ab-alertes"></div>
+    <div class="tableau-ab">
+      <table>
+        <thead><tr><th scope="col">Résultat</th><th scope="col">Scénario A</th><th scope="col">Scénario B<span class="pastille-b" aria-hidden="true"></span></th><th scope="col">Écart B − A</th></tr></thead>
+        <tbody id="corps-ab"></tbody>
+      </table>
+    </div>
+    <p class="ab-conclusion" id="ab-conclusion"></p>
+    <p class="aide">Valeurs à la date de fin. «&nbsp;Réelle&nbsp;»&nbsp;: en euros de la date de départ. Écart&nbsp;: B moins A, signe affiché («&nbsp;+&nbsp;» si B est plus élevé). Simulation, pas un conseil.</p>
+  </section>
+
+  <section class="carte fourchette-mc" id="fourchette-mc" aria-labelledby="titre-fourchette" hidden>
+    <h2 id="titre-fourchette">
+      <svg class="titre-icone" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="2 18 8 13 13 15 22 6" stroke-dasharray="2 3"/><polyline points="2 18 8 15 13 16 22 12"/><polyline points="2 18 8 17 13 18 22 17" stroke-dasharray="2 3"/>
+      </svg>
+      Fourchette de résultats
+    </h2>
+    <p class="mc-explication" id="mc-explication"></p>
+    <div class="tableau-mc">
+      <table>
+        <thead><tr><th scope="col">À la date de fin</th><th scope="col">Pessimiste (10<sup>e</sup> centile)</th><th scope="col">Médiane</th><th scope="col">Optimiste (90<sup>e</sup> centile)</th></tr></thead>
+        <tbody id="corps-mc"></tbody>
+      </table>
+    </div>
+    <p class="mc-detail" id="mc-detail"></p>
+    <p class="avertissement" id="avertissement-mc"><strong>Simulation, pas un conseil&nbsp;; les performances passées ne préjugent pas des performances futures.</strong> Les profils sont des hypothèses de CadenceDCA (voir «&nbsp;Sources des données&nbsp;»). La fourchette donne, à chaque date, le 10<sup>e</sup> et le 90<sup>e</sup> centile des valeurs simulées&nbsp;: ce ne sont pas des bornes, et les marchés réels peuvent faire mieux ou pire.</p>
+  </section>
+
+  <section class="carte" id="frais-fiscalite" aria-labelledby="titre-frais-fiscalite">
+    <h2 id="titre-frais-fiscalite">
+      <svg class="titre-icone" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>
+      </svg>
+      Frais et fiscalité
+    </h2>
+    <p class="fiscal-regime" id="fiscal-regime"></p>
+    <div class="tableau-fiscal">
+      <table>
+        <thead><tr><th>Étape</th><th>Nominal</th><th>Réel</th></tr></thead>
+        <tbody id="corps-fiscal"></tbody>
+      </table>
+    </div>
+    <p class="fiscal-detail" id="fiscal-detail"></p>
+    <div class="fiscal-alertes" id="fiscal-alertes"></div>
+    <p class="avertissement" id="avertissement-fiscal"><strong>Simulation, pas un conseil.</strong> Estimation simplifiée&nbsp;: sortie totale à la date de fin, taux en vigueur au 25/11/2026 appliqués quelle que soit la date, versements tous postérieurs au 27/09/2017 et au 01/01/2018. Votre situation personnelle (autres contrats, retraits passés, option pour le barème, exonérations) n'est pas prise en compte. «&nbsp;Réel&nbsp;» : en euros de la date de départ.</p>
+  </section>
 
   <section class="carte">
     <div class="entete-graphique">
@@ -639,11 +948,17 @@ button.bascule-theme[hidden]{display:none}
         Évolution du placement
       </h2>
       <div class="legende">
-        <span class="legende-item"><span class="legende-trait tirets" style="--c:var(--verse)"></span>Total versé</span>
-        <span class="legende-item"><span class="legende-trait" style="--c:var(--nominal)"></span>Valeur nominale</span>
-        <span class="legende-item"><span class="legende-trait" style="--c:var(--reel)"></span>Valeur réelle (après inflation)</span>
+        <span class="legende-item"><span class="legende-trait tirets" style="--c:var(--verse)"></span><span class="prefixe-a" id="prefixe-a-1" hidden>A&nbsp;: </span>Total versé</span>
+        <span class="legende-item"><span class="legende-trait" style="--c:var(--nominal)"></span><span class="prefixe-a" id="prefixe-a-2" hidden>A&nbsp;: </span>Valeur nominale</span>
+        <span class="legende-item"><span class="legende-trait" style="--c:var(--reel)"></span><span class="prefixe-a" id="prefixe-a-3" hidden>A&nbsp;: </span>Valeur réelle (après inflation)</span>
+        <span class="legende-item" id="legende-b-nominal" hidden><span class="legende-trait tirets-longs" style="--c:var(--scenario-b)"></span>B&nbsp;: valeur nominale (tirets longs)</span>
+        <span class="legende-item" id="legende-b-reel" hidden><span class="legende-trait pointilles" style="--c:var(--scenario-b)"></span>B&nbsp;: valeur réelle (pointillés)</span>
+        <span class="legende-item" id="legende-mc-zone" hidden><span class="legende-trait zone-mc"></span><span id="legende-mc-texte">Fourchette de la valeur nominale (10<sup>e</sup> à 90<sup>e</sup> centile)</span></span>
+        <span class="legende-item" id="legende-mc-mediane" hidden><span class="legende-trait mediane-mc" style="--c:var(--nominal)"></span><span id="legende-mc-mediane-texte">Médiane des tirages (trait mixte)</span></span>
       </div>
     </div>
+    <p class="note-ab" id="note-graphique-mc" hidden></p>
+    <p class="note-ab" id="note-graphique-ab" hidden>Comparaison&nbsp;: valeurs après frais, avant impôt, pour A comme pour B. Marqueurs ronds pour A, carrés pour B.</p>
     <div class="decomposition" id="decomposition" hidden></div>
     <div class="cadre-graphique">
       <svg id="graphique" viewBox="0 0 720 320" role="img" tabindex="0" aria-label="Courbes du total versé, de la valeur nominale et de la valeur réelle. Utilisez la souris ou les flèches gauche et droite pour inspecter chaque mois."></svg>
@@ -660,17 +975,26 @@ button.bascule-theme[hidden]{display:none}
         </svg>
         Année par année
       </h2>
+      <div class="actions-export">
       <button type="button" id="export">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
         </svg>
         Exporter en CSV
       </button>
+      <button type="button" id="export-xlsx">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Exporter en Excel
+      </button>
+      </div>
     </div>
+    <p class="note-ab" id="note-tableau-ab" hidden>Tableau du scénario A. Le scénario B figure dans les exports&nbsp;: section «&nbsp;Comparaison A/B&nbsp;» du CSV, feuilles «&nbsp;Scénario B&nbsp;» et «&nbsp;Comparaison A-B&nbsp;» du fichier Excel.</p>
     <p class="indice-defilement" id="indice-tableau" hidden>Faites glisser le tableau vers la gauche pour voir toutes les colonnes&nbsp;→</p>
     <div class="tableau-defile">
       <table>
-        <thead><tr><th>Année</th><th>Versé dans l'année</th><th>Versé cumulé</th><th>Intérêts de l'année</th><th>Valeur nominale</th><th>Valeur réelle</th></tr></thead>
+        <thead><tr><th>Année</th><th>Versé dans l'année</th><th>Versé cumulé</th><th>Intérêts de l'année</th><th>Valeur nominale</th><th id="th-frais-cumules" hidden>Frais cumulés</th><th id="th-apres-frais" hidden>Valeur après frais</th><th>Valeur réelle</th></tr></thead>
         <tbody id="corps-tableau"></tbody>
       </table>
     </div>
@@ -684,9 +1008,73 @@ button.bascule-theme[hidden]{display:none}
 <ul>
 <li>Gain nominal&nbsp;: la différence entre la valeur finale et vos versements, en euros courants.</li>
 <li>Gain réel&nbsp;: ce même gain en pouvoir d'achat (euros de départ). Exemple&nbsp;: 1&nbsp;000&nbsp;€ puis 100&nbsp;€/mois sur 10&nbsp;ans à 5&nbsp;% donnent 17&nbsp;128,10&nbsp;€ (+4&nbsp;128,10&nbsp;€ nominal), soit 2&nbsp;155,49&nbsp;€ de gain réel avec 2&nbsp;% d'inflation.</li>
-<li>À tester&nbsp;: durées, montants, fréquences, rendements, inflation annuelle ou cumulée — avec export CSV (Excel).</li>
+<li>À tester&nbsp;: durées, montants, fréquences, rendements, inflation annuelle ou cumulée — avec export CSV et Excel.</li>
 </ul>
-<p>Limites&nbsp;: rendement supposé constant, hors frais et fiscalité (PEA, flat tax, assurance-vie). Durée en mois entiers (hebdomadaire lissé à 52/12). Simulation pédagogique, pas un conseil en investissement. 100&nbsp;% local&nbsp;: aucune donnée ne quitte votre ordinateur.</p>
+<p>Limites&nbsp;: rendement supposé constant, frais et fiscalité simplifiés. Durée en mois entiers (hebdomadaire lissé à 52/12). Simulation pédagogique, pas un conseil en investissement. 100&nbsp;% local&nbsp;: aucune donnée ne quitte votre ordinateur.</p>
+</section>
+<section class="carte note" id="sources">
+<h2>Sources des données</h2>
+<p>Inflation (bouton «&nbsp;Inflation INSEE&nbsp;»)&nbsp;: Insee, «&nbsp;L'essentiel sur… l'inflation&nbsp;», tableau «&nbsp;Évolution annuelle moyenne de l'indice des prix à la consommation&nbsp;», France hors Mayotte, ensemble des ménages, années 2000 à 2025, en&nbsp;% à une décimale. Page publiée le 23/03/2026, consultée et extraite le 24/11/2026&nbsp;: https://www.insee.fr/fr/statistiques/4268033. Deux valeurs y diffèrent des publications Insee d'origine, qui sont retenues&nbsp;: 2018, 1,8&nbsp;% (Informations rapides n°&nbsp;2019-9 du 15/01/2019, indices moyens 101,22 puis 103,09)&nbsp;; 2005, 1,7&nbsp;% (Tableaux de l'économie française, édition 2020). Réutilisation selon les conditions générales de l'Insee (art.&nbsp;2.2)&nbsp;: source et date de dernière mise à jour mentionnées. Le cumul d'une période est une approximation, calculée de la moyenne annuelle de l'année de départ à celle de l'année de fin, sans tenir compte des mois, à partir de ces évolutions arrondies&nbsp;: de 2015 à 2025, il donne 20,79&nbsp;%, contre 20,95&nbsp;% d'après les indices publiés (100 en 2015, 120,95 en 2025).</p>
+<p>Profils (hypothèses nominales, constantes, avant fiscalité)&nbsp;:</p>
+<ul>
+<li>Prudent, 1,7&nbsp;%&nbsp;: taux du Livret A depuis le 1er&nbsp;août&nbsp;2026, net d'impôt. Service-Public.fr, «&nbsp;Épargne réglementée&nbsp;», https://www.service-public.gouv.fr/particuliers/actualites/A15818.</li>
+<li>Modéré, 2,63&nbsp;%&nbsp;: rendement moyen 2025 des fonds en euros (contrats individuels), net de frais de gestion, avant prélèvements sociaux. ACPR, Analyses et synthèses n°&nbsp;180, «&nbsp;Revalorisation 2025 des contrats d'assurance-vie et de capitalisation&nbsp;», https://acpr.banque-france.fr/system/files/2026-06/20260630_AS180_revalorisation_2025.pdf.</li>
+<li>Dynamique, 5&nbsp;%&nbsp;: hypothèse retenue par CadenceDCA, volontairement inférieure au rendement réel moyen des actions françaises dividendes réinvestis, 6,6&nbsp;% par an hors inflation de janvier&nbsp;1988 à juin&nbsp;2013 (AMF, Lettre de l'Observatoire de l'épargne n°&nbsp;6, décembre&nbsp;2013, https://www.amf-france.org/sites/institutionnel/files/contenu_simple/lettre_ou_cahier/lettre_observatoire/La%20lettre%20de%20l'Observatoire%20de%20l'epargne%20de%20l'AMF%20-%20ndeg%206%20-%20Decembre%202013.pdf), pour laisser une marge aux frais et aux périodes moins favorables.</li>
+</ul>
+<p>Ces taux ne sont ni des prévisions ni des conseils&nbsp;: simulation, pas un conseil.</p>
+<p id="sources-fourchette">Fourchette de résultats (Monte-Carlo, lot L6.4)&nbsp;: rendements annuels tirés d'une loi log-normale, indépendants d'une année à l'autre, 1&nbsp;000 tirages, générateur pseudo-aléatoire à graine fixe. Les trois profils sont des hypothèses de CadenceDCA, nominales, avant frais et fiscalité, ni prévisions ni conseils&nbsp;; aucune série de cours n'est intégrée. Sources consultées le 25/11/2026&nbsp;:</p>
+<ul id="sources-profils-mc">
+<li>Obligataire, 2,5&nbsp;% par an, volatilité 4&nbsp;%&nbsp;: placement surtout obligataire, rendement un peu sous celui des fonds en euros en 2025 (2,63&nbsp;%, ACPR, Analyses et synthèses n°&nbsp;180, voir ci-dessus)&nbsp;; volatilité dans la classe 3 de l'indicateur de risque SRRI (2 à 5&nbsp;%) et la classe 2 de l'indicateur PRIIPs (0,5 à 5&nbsp;%).</li>
+<li>Équilibré, 4&nbsp;% par an, volatilité 9&nbsp;%&nbsp;: moitié actions, moitié obligations, valeurs intermédiaires entre les deux autres profils&nbsp;; volatilité dans la classe 4 SRRI (5 à 10&nbsp;%) et la classe 3 PRIIPs (5 à 12&nbsp;%).</li>
+<li>Actions monde, 5&nbsp;% par an, volatilité 16&nbsp;%&nbsp;: même rendement que le profil «&nbsp;Dynamique&nbsp;», sous la rentabilité réelle moyenne des actions des grandes économies, «&nbsp;entre 6,5&nbsp;% et 8,5&nbsp;%&nbsp;» par an de 1950 à 2008 (AMF, Lettre de l'Observatoire de l'épargne n°&nbsp;6, décembre&nbsp;2013, voir ci-dessus)&nbsp;; volatilité dans la classe 6 SRRI (15 à 25&nbsp;%) et la classe 4 PRIIPs (12 à 20&nbsp;%).</li>
+<li>Classes SRRI&nbsp;: CESR, «&nbsp;Guidelines on the methodology for the calculation of the synthetic risk and reward indicator in the Key Investor Information Document&nbsp;», réf. CESR/10-673 du 01/07/2010, encadré 2 (pages 6-7), https://www.esma.europa.eu/sites/default/files/library/2015/11/10_673.pdf.</li>
+<li>Classes PRIIPs&nbsp;: règlement délégué (UE) 2017/653 de la Commission du 08/03/2017, annexe II, partie 1, point 2 (classes de risque de marché selon la volatilité équivalente à la VaR), https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32017R0653.</li>
+</ul>
+<p id="sources-fiscalite">Frais et fiscalité (lot 0.3.0), taux en vigueur vérifiés le 25/11/2026 sur les sites officiels, appliqués à des revenus perçus en 2026, modifiables dans «&nbsp;Taux fiscaux utilisés&nbsp;»&nbsp;:</p>
+<ul>
+<li>Prélèvement forfaitaire unique (PFU, compte-titres)&nbsp;: 12,8&nbsp;% d'impôt sur le revenu et 18,6&nbsp;% de prélèvements sociaux, soit 31,4&nbsp;%. Service-Public.fr, «&nbsp;Plus-values de cession de valeurs mobilières&nbsp;», vérifié le 15/04/2026, https://www.service-public.gouv.fr/particuliers/vosdroits/F21618.</li>
+<li>Prélèvements sociaux, cas général (compte-titres, PEA)&nbsp;: 18,6&nbsp;% (CSG 10,6&nbsp;%, CRDS 0,5&nbsp;%, prélèvement de solidarité 7,5&nbsp;%) pour les revenus perçus en 2026, depuis la loi n°&nbsp;2025-1403 du 30/12/2025 de financement de la sécurité sociale pour 2026, article 12. Service-Public.fr, «&nbsp;Prélèvements sociaux sur les revenus du patrimoine et de placements&nbsp;», vérifié le 30/06/2026, https://www.service-public.gouv.fr/particuliers/vosdroits/F2329.</li>
+<li>Prélèvements sociaux, assurance-vie&nbsp;: 17,2&nbsp;% (CSG 9,2&nbsp;%), même page F2329, vérifiée le 30/06/2026.</li>
+<li>PEA&nbsp;: retrait avant 5 ans, 12,8&nbsp;% d'impôt et prélèvements sociaux au taux en vigueur (18,6&nbsp;%)&nbsp;; après 5 ans, exonération d'impôt sur le revenu, prélèvements sociaux au taux en vigueur&nbsp;; plafond de versements du PEA classique, 150&nbsp;000&nbsp;€. impots.gouv.fr, «&nbsp;L'assurance-vie et le PEA&nbsp;», modifiée le 08/04/2026, https://www.impots.gouv.fr/particulier/lassurance-vie-et-le-pea-0.</li>
+<li>Assurance-vie, primes versées depuis le 27/09/2017&nbsp;: avant 8 ans, 12,8&nbsp;%&nbsp;; après 8 ans, abattement annuel de 4&nbsp;600&nbsp;€ (personne seule) ou 9&nbsp;200&nbsp;€ (couple soumis à imposition commune), puis 7,5&nbsp;% sur la part des produits afférente à 150&nbsp;000&nbsp;€ de primes et 12,8&nbsp;% au-delà. Service-Public.fr, «&nbsp;Comment sont imposés les revenus d'un contrat d'assurance-vie&nbsp;?&nbsp;», vérifié le 15/04/2026, https://www.service-public.gouv.fr/particuliers/vosdroits/F22414&nbsp;; même page impots.gouv.fr (08/04/2026).</li>
+<li>Assurance-vie, calcul&nbsp;: part à 7,5&nbsp;% = produits × 150&nbsp;000&nbsp;€ / primes versées au 31 décembre de l'année précédant la sortie (BOFiP, BOI-RPPM-RCM-20-15, §&nbsp;190, version du 21/06/2021, https://bofip.impots.gouv.fr/bofip/11224-PGP.html)&nbsp;; abattement imputé d'abord sur les produits à 7,5&nbsp;%, puis sur ceux à 12,8&nbsp;% (BOFiP, BOI-RPPM-RCM-20-10-20-50, §&nbsp;288, version du 30/06/2022, https://bofip.impots.gouv.fr/bofip/3951-PGP.html/identifiant=BOI-RPPM-RCM-20-10-20-50-20220630).</li>
+<li>Exonéré&nbsp;: intérêts du Livret A et du LDDS exonérés d'impôt sur le revenu et de prélèvements sociaux&nbsp;; plafonds de versements 22&nbsp;950&nbsp;€ (Livret A) et 12&nbsp;000&nbsp;€ (LDDS). Service-Public.fr, fiches F2365 et F2368, vérifiées le 01/08/2026, https://www.service-public.gouv.fr/particuliers/vosdroits/F2365 et https://www.service-public.gouv.fr/particuliers/vosdroits/F2368.</li>
+</ul>
+<p>Simplifications de CadenceDCA&nbsp;: une seule enveloppe, ouverte à la date de départ, sortie totale à la date de fin&nbsp;; ancienneté comptée en mois entiers (5 ans = 60 mois, 8 ans = 96 mois)&nbsp;; plus-value = valeur après frais moins versements (frais d'entrée compris)&nbsp;; prélèvements sociaux de l'assurance-vie calculés à la sortie&nbsp;; ni option pour le barème progressif, ni exonération liée au revenu, ni autre contrat du foyer.</p>
+<details class="sources-serie">
+<summary>Série d'inflation intégrée, année par année</summary>
+<table>
+<thead><tr><th>Année</th><th>Inflation moyenne</th></tr></thead>
+<tbody>
+<tr><td>2000</td><td>1,7&nbsp;%</td></tr>
+<tr><td>2001</td><td>1,6&nbsp;%</td></tr>
+<tr><td>2002</td><td>1,9&nbsp;%</td></tr>
+<tr><td>2003</td><td>2,1&nbsp;%</td></tr>
+<tr><td>2004</td><td>2,1&nbsp;%</td></tr>
+<tr><td>2005</td><td>1,7&nbsp;%</td></tr>
+<tr><td>2006</td><td>1,7&nbsp;%</td></tr>
+<tr><td>2007</td><td>1,5&nbsp;%</td></tr>
+<tr><td>2008</td><td>2,8&nbsp;%</td></tr>
+<tr><td>2009</td><td>0,1&nbsp;%</td></tr>
+<tr><td>2010</td><td>1,5&nbsp;%</td></tr>
+<tr><td>2011</td><td>2,1&nbsp;%</td></tr>
+<tr><td>2012</td><td>2,0&nbsp;%</td></tr>
+<tr><td>2013</td><td>0,9&nbsp;%</td></tr>
+<tr><td>2014</td><td>0,5&nbsp;%</td></tr>
+<tr><td>2015</td><td>0,0&nbsp;%</td></tr>
+<tr><td>2016</td><td>0,2&nbsp;%</td></tr>
+<tr><td>2017</td><td>1,0&nbsp;%</td></tr>
+<tr><td>2018</td><td>1,8&nbsp;%</td></tr>
+<tr><td>2019</td><td>1,1&nbsp;%</td></tr>
+<tr><td>2020</td><td>0,5&nbsp;%</td></tr>
+<tr><td>2021</td><td>1,6&nbsp;%</td></tr>
+<tr><td>2022</td><td>5,2&nbsp;%</td></tr>
+<tr><td>2023</td><td>4,9&nbsp;%</td></tr>
+<tr><td>2024</td><td>2,0&nbsp;%</td></tr>
+<tr><td>2025</td><td>0,9&nbsp;%</td></tr>
+</tbody>
+</table>
+</details>
 </section>
 <footer class="aide">
   <p>Créé par Jean Augeraud et AgoraMesh-MD · Licence PolyForm Noncommercial 1.0.0</p>
@@ -752,6 +1140,14 @@ var Moteur = (function () {
     return String(d.getFullYear()).padStart(4, "0") + "-" + (m < 10 ? "0" : "") + m + "-" + (j < 10 ? "0" : "") + j;
   }
 
+  /* Lot L6.2 : taux de frais, en fraction, de 0 (inclus) à 1 (exclu) ; absent = 0. */
+  function fraction(valeur, nom) {
+    if (valeur === undefined) return 0;
+    var v = nombre(valeur, nom);
+    if (v < 0 || v >= 1) throw new Error("Les " + nom + " doivent être compris entre 0 et 100 % (100 % exclu).");
+    return v;
+  }
+
   function simuler(p) {
     if (!p || typeof p !== "object") throw new Error("Paramètres manquants.");
     var debut = versDate(p.dateDebut, "date de départ");
@@ -785,9 +1181,14 @@ var Moteur = (function () {
       throw new Error("Mode d'inflation inconnu : " + infl.mode + ".");
     }
     var im = Math.pow(1 + iAnnuel, 1 / 12) - 1;
+    /* Lot L6.2 : frais d'entrée (part de chaque versement) et frais de gestion annuels (part de l'encours, 1/12 par mois). */
+    var fe = fraction(p.fraisEntree, "frais d'entrée");
+    var fg = fraction(p.fraisGestion, "frais de gestion");
 
     /* Valeurs réelles en euros de la date de départ : un flux au mois k est divisé par (1 + im)^k. */
     var valeur = initial, verse = initial, verseReel = initial, mois = [];
+    /* Valeur après frais, suivie à part : la valeur sans frais (valeur) reste calculée exactement comme avant L6.2. */
+    var valeurF = initial * (1 - fe), fraisE = initial * fe, fraisG = 0;
     for (var k = 0; k < n; k++) {
       var versementDuMois = (k % f.pasMois === 0) ? regulier * f.parMois : 0;
       valeur += versementDuMois;
@@ -795,6 +1196,14 @@ var Moteur = (function () {
       verseReel += versementDuMois / Math.pow(1 + im, k);
       var interets = valeur * rm;
       valeur += interets;
+      var entreeDuMois = versementDuMois * fe;
+      fraisE += entreeDuMois;
+      valeurF += versementDuMois - entreeDuMois;
+      valeurF += valeurF * rm;
+      var gestionDuMois = valeurF * fg / 12;
+      valeurF -= gestionDuMois;
+      fraisG += gestionDuMois;
+      var deflateur = Math.pow(1 + im, k + 1);
       mois.push({
         date: enIso(ajouterMois(debut, k + 1)),
         versementDuMois: versementDuMois,
@@ -802,10 +1211,16 @@ var Moteur = (function () {
         interetsDuMois: interets,
         valeur: valeur,
         verseCumuleReel: verseReel,
-        valeurReelle: valeur / Math.pow(1 + im, k + 1)
+        valeurReelle: valeur / Math.pow(1 + im, k + 1),
+        fraisEntreeDuMois: k === 0 ? entreeDuMois + initial * fe : entreeDuMois,
+        fraisGestionDuMois: gestionDuMois,
+        fraisCumules: fraisE + fraisG,
+        valeurApresFrais: valeurF,
+        valeurApresFraisReelle: valeurF / deflateur
       });
     }
     var valeurReelle = valeur / Math.pow(1 + im, n);
+    var deflateurFinal = Math.pow(1 + im, n);
     return {
       nombreMois: n,
       tauxMensuel: rm,
@@ -820,14 +1235,497 @@ var Moteur = (function () {
         totalVerseReel: verseReel,
         valeurFinaleReelle: valeurReelle,
         gainReel: valeurReelle - verseReel,
-        pertePouvoirAchat: valeurReelle - verseReel < -0.005
+        pertePouvoirAchat: valeurReelle - verseReel < -0.005,
+        fraisEntree: fraisE,
+        fraisGestion: fraisG,
+        fraisTotal: fraisE + fraisG,
+        valeurApresFrais: valeurF,
+        valeurApresFraisReelle: valeurF / deflateurFinal,
+        deflateurFinal: deflateurFinal
       }
     };
   }
 
-  return { simuler: simuler, moisEntiers: moisEntiers, FREQUENCES: FREQUENCES };
+  /* Corrections L6.2 (A-C1) : primes versées au 31 décembre de l'année précédant la sortie (date de fin), d'après
+     l'échéancier de simuler() (versement initial à la date de départ, versement du mois k à départ + k mois).
+     Base du prorata à 7,5 % de l'assurance-vie : BOFiP BOI-RPPM-RCM-20-15 § 190. N'altère pas la simulation. */
+  function primesAu31Decembre(p, r) {
+    var debut = versDate(p.dateDebut, "date de départ"), fin = versDate(p.dateFin, "date de fin");
+    var arrete = dateLocale(fin.getFullYear() - 1, 11, 31), total = debut <= arrete ? montant(p.versementInitial, "versement initial") : 0;
+    for (var k = 0; k < r.mois.length; k++) {
+      if (r.mois[k].versementDuMois && ajouterMois(debut, k) <= arrete) total += r.mois[k].versementDuMois;
+    }
+    return { date: enIso(arrete), montant: total };
+  }
+
+  /* ---------- Lot L6.2 : fiscalité à la sortie totale ----------
+     Taux vérifiés le 25/11/2026 (sources et dates : section « Sources des données » de la page et
+     Dev/08-docs/developpeur/frais-fiscalite.md). Fractions pour les taux, euros pour les montants. */
+  var FISCALITE = {
+    verification: "2026-11-25",
+    taux: {
+      impotForfaitaire: 0.128,            /* PFU, part impôt sur le revenu ; aussi PEA avant 5 ans, assurance-vie avant 8 ans */
+      prelevementsSociaux: 0.186,         /* cas général 2026 (CSG 10,6 + CRDS 0,5 + solidarité 7,5) : compte-titres, PEA */
+      prelevementsSociauxAssuranceVie: 0.172, /* assurance-vie (CSG 9,2) */
+      assuranceVieReduit: 0.075,          /* assurance-vie après 8 ans, part afférente au seuil de primes */
+      assuranceVieSeuilPrimes: 150000,
+      abattementSeul: 4600,
+      abattementCouple: 9200,
+      plafondPea: 150000,
+      plafondLivretA: 22950,
+      plafondLdds: 12000
+    },
+    seuilsMois: { pea: 60, "assurance-vie": 96 },
+    enveloppes: ["brut", "pea", "cto", "assurance-vie", "exonere"]
+  };
+
+  function tauxFiscaux(t) {
+    var r = {}, cle;
+    for (cle in FISCALITE.taux) r[cle] = FISCALITE.taux[cle];
+    if (t) for (cle in t) {
+      if (!Object.prototype.hasOwnProperty.call(FISCALITE.taux, cle)) throw new Error("Taux fiscal inconnu : " + cle + ".");
+      var v = nombre(t[cle], "taux fiscal " + cle);
+      if (v < 0 || (FISCALITE.taux[cle] < 1 && v > 1)) throw new Error("Le taux fiscal " + cle + " doit être compris entre 0 et 100 %.");
+      r[cle] = v;
+    }
+    return r;
+  }
+
+  /* Impôt dû à la sortie totale. o : { enveloppe, foyer ("seul" | "couple"), valeur (valeur après frais à la date de fin),
+     verse (versements bruts, frais d'entrée compris), nombreMois (ancienneté), taux (facultatif, remplace des taux),
+     primes (facultatif : primes au 31/12 de l'année précédant la sortie, voir primesAu31Decembre ; à défaut, verse) }. */
+  function fiscalite(o) {
+    if (!o || typeof o !== "object") throw new Error("Paramètres fiscaux manquants.");
+    var enveloppe = o.enveloppe === undefined || o.enveloppe === "" ? "brut" : o.enveloppe;
+    if (FISCALITE.enveloppes.indexOf(enveloppe) < 0) throw new Error("Enveloppe inconnue : " + enveloppe + ".");
+    var foyer = o.foyer === undefined || o.foyer === "" ? "seul" : o.foyer;
+    if (foyer !== "seul" && foyer !== "couple") throw new Error("Foyer inconnu : " + foyer + ".");
+    var t = tauxFiscaux(o.taux);
+    var valeur = nombre(o.valeur, "valeur après frais"), verse = nombre(o.verse, "versements", { positif: true });
+    var nMois = nombre(o.nombreMois, "ancienneté", { positif: true });
+    var primes = o.primes === undefined ? verse : nombre(o.primes, "primes au 31 décembre", { positif: true });
+    var plusValue = valeur - verse, base = Math.max(0, plusValue);
+    var r = { enveloppe: enveloppe, foyer: foyer, taux: t, plusValue: plusValue, base: base, impotRevenu: 0, prelevementsSociaux: 0,
+      tauxImpot: 0, tauxPrelevements: 0, seuilMois: FISCALITE.seuilsMois[enveloppe] || null, seuilAtteint: null,
+      abattement: 0, partReduite: 0, primes: primes, baseReduite: 0, baseNormale: 0, avertissements: [] };
+    if (enveloppe === "cto") {
+      r.tauxImpot = t.impotForfaitaire; r.tauxPrelevements = t.prelevementsSociaux;
+      r.impotRevenu = base * t.impotForfaitaire;
+      r.prelevementsSociaux = base * t.prelevementsSociaux;
+    } else if (enveloppe === "pea") {
+      r.seuilAtteint = nMois >= FISCALITE.seuilsMois.pea;
+      r.tauxImpot = r.seuilAtteint ? 0 : t.impotForfaitaire; r.tauxPrelevements = t.prelevementsSociaux;
+      r.impotRevenu = base * r.tauxImpot;
+      r.prelevementsSociaux = base * t.prelevementsSociaux;
+      if (verse > t.plafondPea) r.avertissements.push({ code: "plafond-pea", versements: verse, plafond: t.plafondPea });
+    } else if (enveloppe === "assurance-vie") {
+      r.seuilAtteint = nMois >= FISCALITE.seuilsMois["assurance-vie"];
+      r.tauxPrelevements = t.prelevementsSociauxAssuranceVie;
+      r.prelevementsSociaux = base * t.prelevementsSociauxAssuranceVie;
+      if (!r.seuilAtteint) {
+        r.tauxImpot = t.impotForfaitaire;
+        r.impotRevenu = base * t.impotForfaitaire;
+        r.baseNormale = base;
+      } else {
+        /* Part des produits afférente au seuil de primes (150 000 €), rapporté aux primes au 31/12 de l'année précédant
+           la sortie (BOFiP § 190), puis abattement imputé d'abord sur cette part. */
+        var part = primes > 0 ? Math.min(1, t.assuranceVieSeuilPrimes / primes) : 1;
+        var produitsReduits = base * part, produitsNormaux = base - produitsReduits;
+        var abattement = foyer === "couple" ? t.abattementCouple : t.abattementSeul;
+        r.abattement = Math.min(abattement, base);
+        r.partReduite = part;
+        r.baseReduite = Math.max(0, produitsReduits - abattement);
+        r.baseNormale = Math.max(0, produitsNormaux - Math.max(0, abattement - produitsReduits));
+        r.impotRevenu = r.baseReduite * t.assuranceVieReduit + r.baseNormale * t.impotForfaitaire;
+        r.tauxImpot = base > 0 ? r.impotRevenu / base : 0;
+      }
+    } else if (enveloppe === "exonere") {
+      if (verse > t.plafondLivretA) r.avertissements.push({ code: "plafond-livret-a", versements: verse, plafond: t.plafondLivretA });
+      if (verse > t.plafondLdds) r.avertissements.push({ code: "plafond-ldds", versements: verse, plafond: t.plafondLdds });
+    }
+    if (enveloppe !== "brut" && enveloppe !== "exonere" && plusValue <= 0) r.avertissements.push({ code: "moins-value", plusValue: plusValue });
+    r.total = r.impotRevenu + r.prelevementsSociaux;
+    r.valeurNette = valeur - r.total;
+    return r;
+  }
+
+  /* ---------- Lot L6.3 : comparaison A/B ----------
+     scenario(p) : simulation, primes au 31/12 et fiscalité d'un jeu de paramètres complet (mêmes appels que l'interface ;
+     p.fiscalite = { enveloppe, foyer, taux }, facultatif). comparer(pA, pB) : les deux scénarios et l'écart B - A de chaque
+     résultat de RESULTATS_COMPARES (valeurs à la date de fin ; « Reelle » : euros de la date de départ). N'altère pas simuler(). */
+  var RESULTATS_COMPARES = ["totalVerse", "valeurFinale", "valeurFinaleReelle", "valeurApresFrais", "valeurApresFraisReelle",
+    "valeurNette", "valeurNetteReelle", "fraisTotal", "gainNet"];
+  function scenario(p) {
+    var r = simuler(p), fp = p.fiscalite || {};
+    var pr = primesAu31Decembre(p, r);
+    var f = fiscalite({ enveloppe: fp.enveloppe, foyer: fp.foyer, taux: fp.taux,
+      valeur: r.totaux.valeurApresFrais, verse: r.totaux.totalVerse, nombreMois: r.nombreMois, primes: pr.montant });
+    f.datePrimes = pr.date;
+    var t = r.totaux;
+    return { p: p, r: r, f: f, resultats: {
+      totalVerse: t.totalVerse, valeurFinale: t.valeurFinale, valeurFinaleReelle: t.valeurFinaleReelle,
+      valeurApresFrais: t.valeurApresFrais, valeurApresFraisReelle: t.valeurApresFraisReelle,
+      valeurNette: f.valeurNette, valeurNetteReelle: f.valeurNette / t.deflateurFinal,
+      fraisTotal: t.fraisTotal, gainNet: f.valeurNette - t.totalVerse } };
+  }
+  function comparer(pA, pB) {
+    var a = scenario(pA), b = scenario(pB), ecart = {};
+    /* Corrections L6.3 (F-C2) : l'écart est la différence des montants arrondis au centime (B arrondi - A arrondi),
+       c'est-à-dire exactement la soustraction des deux montants affichés et exportés. */
+    RESULTATS_COMPARES.forEach(function (k) { ecart[k] = (Math.round(b.resultats[k] * 100) - Math.round(a.resultats[k] * 100)) / 100; });
+    return { a: a, b: b, ecart: ecart };
+  }
+  /* Raccourci « DCA ou versement unique » : copie de p dont le total versé par p est placé en une fois au départ. */
+  function versementUnique(p) {
+    var t = simuler(p).totaux, q = {};
+    for (var k in p) if (Object.prototype.hasOwnProperty.call(p, k)) q[k] = p[k];
+    q.versementInitial = t.totalVerse; q.versementRegulier = 0; q.frequence = "aucune";
+    return q;
+  }
+
+  return { simuler: simuler, moisEntiers: moisEntiers, FREQUENCES: FREQUENCES, fiscalite: fiscalite, FISCALITE: FISCALITE,
+    primesAu31Decembre: primesAu31Decembre, scenario: scenario, comparer: comparer, versementUnique: versementUnique,
+    RESULTATS_COMPARES: RESULTATS_COMPARES };
 })();
 if (typeof module !== "undefined") module.exports = Moteur;
+</script>
+<script id="montecarlo">
+"use strict";
+/* Lot L6.4 : fourchette Monte-Carlo. Code pur : aucun accès au DOM, aucune requête. Utilise Moteur (bloc moteur).
+   Contrat : Dev/08-docs/developpeur/monte-carlo.md. Valeurs attendues : Dev/06-tests/references/calcul-monte-carlo.py.
+   - Rendement de l'année a d'un tirage : 1 + R = (1 + mu) × exp(s × z − s² / 2), z normale centrée réduite,
+     s² = ln(1 + sigma² / (1 + mu)²) : loi log-normale de moyenne 1 + mu et d'écart-type sigma ; années indépendantes.
+     sigma = 0 donne exactement 1 + R = 1 + mu, donc la courbe déterministe de Moteur.simuler().
+   - Chaque mois : mêmes opérations, dans le même ordre, que Moteur.simuler() (versement, intérêts au taux mensuel
+     (1 + R)^(1/12) − 1, frais d'entrée et de gestion), avec le taux de l'année du mois (année = mois 0 à 11, 12 à 23…).
+   - Générateur pseudo-aléatoire mulberry32 à graine fixe ; normales par Box-Muller (z = √(−2 ln u1) × cos(2π u2)),
+     tirées dans l'ordre tirage 1 année 1, tirage 1 année 2… : mêmes paramètres, mêmes résultats.
+   - Centiles : interpolation linéaire entre valeurs triées (h = (N − 1) × q), définition par défaut de numpy. */
+var MonteCarlo = (function () {
+  var TIRAGES = 1000, GRAINE = 20261125, CENTILES = [0.1, 0.5, 0.9];
+
+  /* Profils de la fourchette : rendement moyen et volatilité annuels, hypothèses de CadenceDCA (sources : section
+     « Sources des données » de la page, consultées le 25/11/2026). Ce ne sont ni des prévisions ni des conseils. */
+  var PROFILS = [
+    { id: "obligataire", nom: "Obligataire", rendement: 2.5, volatilite: 4,
+      resume: "placement surtout obligataire : 2,5 % par an en moyenne, volatilité 4 % par an" },
+    { id: "equilibre", nom: "Équilibré", rendement: 4, volatilite: 9,
+      resume: "moitié actions, moitié obligations : 4 % par an en moyenne, volatilité 9 % par an" },
+    { id: "actions", nom: "Actions monde", rendement: 5, volatilite: 16,
+      resume: "actions de grands pays : 5 % par an en moyenne, volatilité 16 % par an" }
+  ];
+
+  /* mulberry32 : entier 32 bits d'état ; rend un réel de [0 ; 1[. */
+  function alea(graine) {
+    var a = graine >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function normales(graine, nombre) {
+    var u = alea(graine), z = new Float64Array(nombre);
+    for (var i = 0; i < nombre; i++) {
+      var u1 = 1 - u(), u2 = u();
+      z[i] = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+    }
+    return z;
+  }
+  /* Facteurs annuels 1 + R d'une loi log-normale de moyenne 1 + mu et d'écart-type sigma. */
+  function parametresLogNormale(mu, sigma) {
+    var s2 = Math.log(1 + (sigma * sigma) / ((1 + mu) * (1 + mu)));
+    return { s: Math.sqrt(s2), s2: s2 };
+  }
+  /* Centile q de valeurs triées ; avec ordre (indices des valeurs rangées par ordre croissant), de valeurs non triées. */
+  function centile(valeurs, q, ordre) {
+    var n = valeurs.length, h = (n - 1) * q, i = Math.floor(h), f = h - i;
+    var a = valeurs[ordre ? ordre[i] : i];
+    return i + 1 < n ? a + f * (valeurs[ordre ? ordre[i + 1] : i + 1] - a) : a;
+  }
+  /* Range les indices par valeur croissante, par insertion à partir de l'ordre du mois précédent : d'un mois à l'autre, les
+     tirages changent peu de rang, d'où un coût presque linéaire (un tri complet de chaque mois coûterait 5 à 10 fois plus). */
+  function ranger(ordre, valeurs) {
+    for (var i = 1; i < ordre.length; i++) {
+      var x = ordre[i], v = valeurs[x], j = i - 1;
+      while (j >= 0 && valeurs[ordre[j]] > v) { ordre[j + 1] = ordre[j]; j--; }
+      ordre[j + 1] = x;
+    }
+  }
+  function trois(valeurs, ordre) {
+    ranger(ordre, valeurs);
+    return { p10: centile(valeurs, CENTILES[0], ordre), p50: centile(valeurs, CENTILES[1], ordre), p90: centile(valeurs, CENTILES[2], ordre) };
+  }
+  function identite(n) { var o = new Int32Array(n); for (var i = 0; i < n; i++) o[i] = i; return o; }
+
+  /* p : paramètres de Moteur.simuler (avec p.fiscalite facultatif, comme Moteur.scenario) ; o : { volatilite (fraction),
+     tirages, graine } facultatifs. Rend les centiles de chaque mois (valeur nominale avant et après frais), de chaque fin
+     d'année (aussi en euros de la date de départ) et de la date de fin (aussi nets d'impôt). */
+  function simuler(p, o) {
+    o = o || {};
+    var sigma = o.volatilite === undefined ? 0 : o.volatilite;
+    if (typeof sigma !== "number" || !isFinite(sigma) || sigma < 0 || sigma > 1) throw new Error("La volatilité doit être comprise entre 0 et 100 %.");
+    var N = o.tirages === undefined ? TIRAGES : o.tirages, graine = o.graine === undefined ? GRAINE : o.graine;
+    if (N % 1 !== 0 || N < 2) throw new Error("Nombre de tirages invalide.");
+    var sc = Moteur.scenario(p), r = sc.r, n = r.nombreMois, mu = p.rendementAnnuel;
+    var fe = p.fraisEntree || 0, fg = p.fraisGestion || 0, initial = p.versementInitial || 0;
+    var Y = Math.ceil(n / 12), ln = parametresLogNormale(mu, sigma), z = normales(graine, N * Y);
+    /* Taux mensuel de chaque tirage et de chaque année, calculé comme Moteur.simuler() : (1 + r)^(1/12) − 1. */
+    var tm = new Float64Array(N * Y);
+    for (var i = 0; i < N * Y; i++) tm[i] = Math.pow((1 + mu) * Math.exp(ln.s * z[i] - ln.s2 / 2), 1 / 12) - 1;
+    var im = Math.pow(1 + r.totaux.inflationAnnuelle, 1 / 12) - 1;
+    var valeur = new Float64Array(N), valeurF = new Float64Array(N), ordreV = identite(N), ordreF = identite(N);
+    valeur.fill(initial); valeurF.fill(initial * (1 - fe));
+    var bande = { valeur: [trois(valeur, ordreV)], valeurApresFrais: [trois(valeurF, ordreF)] }, annees = [];
+    for (var k = 0; k < n; k++) {
+      var v = r.mois[k].versementDuMois, a = Math.floor(k / 12);
+      for (var j = 0; j < N; j++) {
+        var rm = tm[j * Y + a];
+        var x = valeur[j] + v;
+        x += x * rm;
+        valeur[j] = x;
+        var y = valeurF[j] + (v - v * fe);
+        y += y * rm;
+        y -= y * fg / 12;
+        valeurF[j] = y;
+      }
+      var cv = trois(valeur, ordreV), cf = trois(valeurF, ordreF);
+      bande.valeur.push(cv); bande.valeurApresFrais.push(cf);
+      if (k % 12 === 11 || k === n - 1) {
+        var d = Math.pow(1 + im, k + 1), reel = function (c) { return { p10: c.p10 / d, p50: c.p50 / d, p90: c.p90 / d }; };
+        annees.push({ annee: a + 1, mois: k - a * 12 + 1, date: r.mois[k].date, valeur: cv, valeurReelle: reel(cv),
+          valeurApresFrais: cf, valeurApresFraisReelle: reel(cf), deflateur: d });
+      }
+    }
+    /* Date de fin : valeur nette d'impôt de chaque tirage (même fiscalité que Moteur.scenario, primes inchangées). */
+    var fp = p.fiscalite || {}, primes = Moteur.primesAu31Decembre(p, r).montant, verse = r.totaux.totalVerse;
+    var net = new Float64Array(N), sous = 0;
+    for (j = 0; j < N; j++) {
+      net[j] = Moteur.fiscalite({ enveloppe: fp.enveloppe, foyer: fp.foyer, taux: fp.taux, valeur: valeurF[j], verse: verse, nombreMois: n, primes: primes }).valeurNette;
+      if (net[j] < verse) sous++;
+    }
+    var fin = annees[annees.length - 1], cn = trois(net, identite(N)), dF = r.totaux.deflateurFinal;
+    return {
+      tirages: N, graine: graine, rendement: mu, volatilite: sigma, nombreMois: n, nombreAnnees: Y, scenario: sc,
+      bande: bande, annees: annees,
+      final: { valeurFinale: fin.valeur, valeurFinaleReelle: fin.valeurReelle, valeurApresFrais: fin.valeurApresFrais,
+        valeurApresFraisReelle: fin.valeurApresFraisReelle, valeurNette: cn,
+        valeurNetteReelle: { p10: cn.p10 / dF, p50: cn.p50 / dF, p90: cn.p90 / dF } },
+      partSousVerse: sous / N
+    };
+  }
+
+  function profil(id) {
+    for (var i = 0; i < PROFILS.length; i++) if (PROFILS[i].id === id) return PROFILS[i];
+    return null;
+  }
+
+  return { TIRAGES: TIRAGES, GRAINE: GRAINE, CENTILES: CENTILES, PROFILS: PROFILS, alea: alea, normales: normales,
+    parametresLogNormale: parametresLogNormale, centile: centile, simuler: simuler, profil: profil };
+})();
+if (typeof module !== "undefined") module.exports = MonteCarlo;
+</script>
+<script id="xlsx">
+"use strict";
+/* Lot L6.1b : classeur Excel (XLSX) écrit dans la page, sans bibliothèque ni réseau. Code pur : aucun accès au DOM.
+   Archive ZIP sans compression (méthode 0, « stored »), CRC-32 calculé ici ; SpreadsheetML minimal (ECMA-376) :
+   [Content_Types].xml, _rels/.rels, xl/workbook.xml, xl/_rels/workbook.xml.rels, xl/styles.xml, une feuille par onglet.
+   Textes en chaînes en ligne (inlineStr), sans table de chaînes partagées. Détail : Dev/08-docs/developpeur/export-xlsx.md.
+   Cellule : null (vide), chaîne (texte), nombre, ou { v: valeur, s: style } avec style parmi STYLES ci-dessous ;
+   une date est une chaîne AAAA-MM-JJ au style « date », écrite en numéro de série Excel à partir du 01/01/1900,
+   en texte JJ/MM/AAAA avant cette date (voir serieDate). */
+var Xlsx = (function () {
+  var TABLE_CRC = (function () {
+    var t = [];
+    for (var n = 0; n < 256; n++) {
+      var c = n;
+      for (var k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1;
+      t[n] = c >>> 0;
+    }
+    return t;
+  })();
+  /* CRC-32 (polynôme 0xEDB88320, celui du format ZIP). */
+  function crc32(octets) {
+    var c = 0xFFFFFFFF;
+    for (var i = 0; i < octets.length; i++) c = TABLE_CRC[(c ^ octets[i]) & 0xFF] ^ (c >>> 8);
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+  /* Encodage UTF-8, sans TextEncoder ; une demi-paire de substitution isolée devient U+FFFD. */
+  function utf8(texte) {
+    var o = [];
+    for (var i = 0; i < texte.length; i++) {
+      var c = texte.charCodeAt(i);
+      if (c >= 0xD800 && c <= 0xDBFF && i + 1 < texte.length) {
+        var d = texte.charCodeAt(i + 1);
+        if (d >= 0xDC00 && d <= 0xDFFF) { c = 0x10000 + ((c - 0xD800) << 10) + (d - 0xDC00); i++; }
+      }
+      if (c >= 0xD800 && c <= 0xDFFF) c = 0xFFFD;
+      if (c < 0x80) o.push(c);
+      else if (c < 0x800) o.push(0xC0 | (c >> 6), 0x80 | (c & 63));
+      else if (c < 0x10000) o.push(0xE0 | (c >> 12), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63));
+      else o.push(0xF0 | (c >> 18), 0x80 | ((c >> 12) & 63), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63));
+    }
+    return new Uint8Array(o);
+  }
+
+  /* Archive ZIP « stored » : en-tête local + données par entrée, répertoire central, fin de répertoire central.
+     fichiers : [{ nom: "chemin/ascii.xml", octets: Uint8Array }] ; quand : date de modification inscrite (heure locale). */
+  function zip(fichiers, quand) {
+    var a = quand && typeof quand.getFullYear === "function" ? quand : null;
+    var annee = a ? Math.min(2107, Math.max(1980, a.getFullYear())) : 1980;
+    var heureDos = a ? (a.getHours() << 11) | (a.getMinutes() << 5) | (a.getSeconds() >> 1) : 0;
+    var jourDos = ((annee - 1980) << 9) | ((a ? a.getMonth() + 1 : 1) << 5) | (a ? a.getDate() : 1);
+    var morceaux = [], central = [], decalage = 0;
+    function u16(t, v) { t.push(v & 255, (v >>> 8) & 255); }
+    function u32(t, v) { t.push(v & 255, (v >>> 8) & 255, (v >>> 16) & 255, (v >>> 24) & 255); }
+    fichiers.forEach(function (f) {
+      if (!/^[\x21-\x7e]+$/.test(f.nom)) throw new Error("nom d'entrée ZIP non ASCII : " + f.nom);
+      var nom = utf8(f.nom), crc = crc32(f.octets), taille = f.octets.length, h = [];
+      u32(h, 0x04034b50); u16(h, 20); u16(h, 0); u16(h, 0); u16(h, heureDos); u16(h, jourDos);
+      u32(h, crc); u32(h, taille); u32(h, taille); u16(h, nom.length); u16(h, 0);
+      for (var i = 0; i < nom.length; i++) h.push(nom[i]);
+      var c = [];
+      u32(c, 0x02014b50); u16(c, 20); u16(c, 20); u16(c, 0); u16(c, 0); u16(c, heureDos); u16(c, jourDos);
+      u32(c, crc); u32(c, taille); u32(c, taille); u16(c, nom.length); u16(c, 0); u16(c, 0); u16(c, 0); u16(c, 0);
+      u32(c, 0); u32(c, decalage);
+      for (var j = 0; j < nom.length; j++) c.push(nom[j]);
+      morceaux.push(new Uint8Array(h), f.octets);
+      central = central.concat(c);
+      decalage += h.length + taille;
+    });
+    var fin = [];
+    u32(fin, 0x06054b50); u16(fin, 0); u16(fin, 0); u16(fin, fichiers.length); u16(fin, fichiers.length);
+    u32(fin, central.length); u32(fin, decalage); u16(fin, 0);
+    morceaux.push(new Uint8Array(central), new Uint8Array(fin));
+    var total = morceaux.reduce(function (s, m) { return s + m.length; }, 0), sortie = new Uint8Array(total), p = 0;
+    morceaux.forEach(function (m) { sortie.set(m, p); p += m.length; });
+    return sortie;
+  }
+
+  /* ---------- SpreadsheetML ---------- */
+  var NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
+  var NS_R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+  var ENTETE_XML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+  /* Index dans cellXfs de styles.xml : 164 = euros à deux décimales, 10 = pourcentage à deux décimales (format
+     intégré), 165 = date JJ/MM/AAAA, 1 = entier (format intégré). */
+  var STYLES = { texte: 0, gras: 1, euro: 2, pct: 3, date: 4, entier: 5, long: 6 };
+  var STYLES_XML = ENTETE_XML +
+    '<styleSheet xmlns="' + NS + '">' +
+    '<numFmts count="2"><numFmt numFmtId="164" formatCode="#,##0.00\\ &quot;€&quot;"/><numFmt numFmtId="165" formatCode="dd/mm/yyyy"/></numFmts>' +
+    '<fonts count="2"><font><sz val="11"/><name val="Calibri"/><family val="2"/></font><font><b/><sz val="11"/><name val="Calibri"/><family val="2"/></font></fonts>' +
+    '<fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills>' +
+    '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>' +
+    '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
+    '<cellXfs count="7">' +
+      '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' +
+      '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>' +
+      '<xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' +
+      '<xf numFmtId="10" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' +
+      '<xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' +
+      '<xf numFmtId="1" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' +
+      '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>' +
+    '</cellXfs>' +
+    '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>' +
+    '</styleSheet>';
+
+  /* Texte XML : caractères interdits en XML 1.0 retirés, puis & < > " échappés. */
+  function echapper(t) {
+    return String(t).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F￾￿]/g, "")
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  function lettres(i) { var s = ""; for (i = i + 1; i > 0; i = Math.floor((i - 1) / 26)) s = String.fromCharCode(65 + ((i - 1) % 26)) + s; return s; }
+  /* Lot L6.1b-C1 : jours écoulés depuis le 01/01/1970 d'une date du calendrier grégorien, calculés sur l'année complète,
+     sans Date.UTC (qui lit les années 0 à 99 comme 1900 à 1999). */
+  function joursCivils(a, m, j) {
+    a -= m <= 2 ? 1 : 0;
+    var ere = Math.floor(a / 400), an = a - ere * 400;
+    var jourAn = Math.floor((153 * (m > 2 ? m - 3 : m + 9) + 2) / 5) + j - 1;
+    return ere * 146097 + an * 365 + Math.floor(an / 4) - Math.floor(an / 100) + jourAn - 719468;
+  }
+  var JOURS_30_12_1899 = joursCivils(1899, 12, 30);
+  /* Numéro de série Excel d'une date AAAA-MM-JJ, calendrier « 1900 » d'Excel : 01/01/1900 = 1, 28/02/1900 = 59,
+     60 = 29/02/1900 fictif d'Excel (jamais produit), 01/03/1900 = 61. Avant le 01/01/1900, Excel n'a pas de numéro
+     de série : la fonction rend null, et la cellule est écrite en texte JJ/MM/AAAA (voir cellule). */
+  function serieDate(iso) {
+    var p = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso));
+    if (!p) throw new Error("date invalide pour Excel : " + iso);
+    var a = Number(p[1]), m = Number(p[2]), j = Number(p[3]);
+    var bissextile = a % 4 === 0 && (a % 100 !== 0 || a % 400 === 0);
+    if (m < 1 || m > 12 || j < 1 || j > [31, bissextile ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][m - 1])
+      throw new Error("date invalide pour Excel : " + iso);
+    var n = joursCivils(a, m, j) - JOURS_30_12_1899;
+    if (n < 61) n -= 1;
+    return n >= 1 ? n : null;
+  }
+  function cellule(ref, c) {
+    if (c === null || c === undefined) return "";
+    var v = c, style = null;
+    if (typeof c === "object") { v = c.v; style = c.s || null; }
+    if (style !== null && !(style in STYLES)) throw new Error("style inconnu : " + style);
+    var s = style && STYLES[style] ? ' s="' + STYLES[style] + '"' : "";
+    if (style === "date") {
+      var n = serieDate(v);
+      /* Date antérieure au 01/01/1900 : texte JJ/MM/AAAA, comme à l'écran et dans le CSV, sans style de date. */
+      if (n === null) { v = v.slice(8, 10) + "/" + v.slice(5, 7) + "/" + v.slice(0, 4); s = ""; }
+      else v = n;
+    }
+    if (typeof v === "number") {
+      if (!isFinite(v)) throw new Error("nombre non fini en " + ref);
+      return '<c r="' + ref + '"' + s + "><v>" + String(v) + "</v></c>";
+    }
+    return '<c r="' + ref + '"' + s + ' t="inlineStr"><is><t xml:space="preserve">' + echapper(v) + "</t></is></c>";
+  }
+  function feuilleXml(f, premiere) {
+    var lignesXml = [], maxCol = 0;
+    f.lignes.forEach(function (ligne, i) {
+      var cellules = (ligne || []).map(function (c, j) { return cellule(lettres(j) + (i + 1), c); }).join("");
+      if (ligne && ligne.length > maxCol) maxCol = ligne.length;
+      if (cellules) lignesXml.push('<row r="' + (i + 1) + '">' + cellules + "</row>");
+    });
+    var vue = '<sheetViews><sheetView workbookViewId="0"' + (premiere ? ' tabSelected="1"' : "") + ">" +
+      (f.figer ? '<pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/>' : "") + "</sheetView></sheetViews>";
+    var colonnes = (f.colonnes || []).map(function (l, j) { return '<col min="' + (j + 1) + '" max="' + (j + 1) + '" width="' + l + '" customWidth="1"/>'; }).join("");
+    return ENTETE_XML + '<worksheet xmlns="' + NS + '" xmlns:r="' + NS_R + '">' +
+      '<dimension ref="A1:' + lettres(Math.max(0, maxCol - 1)) + Math.max(1, f.lignes.length) + '"/>' + vue +
+      '<sheetFormatPr defaultRowHeight="15"/>' + (colonnes ? "<cols>" + colonnes + "</cols>" : "") +
+      "<sheetData>" + lignesXml.join("") + "</sheetData></worksheet>";
+  }
+
+  /* feuilles : [{ nom, lignes: [[cellule…]…], colonnes: [largeurs], figer: true pour figer la première ligne }]. */
+  function classeur(feuilles, quand) {
+    if (!feuilles.length) throw new Error("classeur sans feuille");
+    feuilles.forEach(function (f) { if (!f.nom || f.nom.length > 31 || /[\[\]:*?\/\\]/.test(f.nom)) throw new Error("nom de feuille invalide : " + f.nom); });
+    var types = ENTETE_XML + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+      '<Default Extension="xml" ContentType="application/xml"/>' +
+      '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
+      '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
+      feuilles.map(function (f, i) { return '<Override PartName="/xl/worksheets/sheet' + (i + 1) + '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'; }).join("") +
+      "</Types>";
+    var rels = ENTETE_XML + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      '<Relationship Id="rId1" Type="' + NS_R + '/officeDocument" Target="xl/workbook.xml"/></Relationships>';
+    var classeurXml = ENTETE_XML + '<workbook xmlns="' + NS + '" xmlns:r="' + NS_R + '">' +
+      '<bookViews><workbookView activeTab="0"/></bookViews><sheets>' +
+      feuilles.map(function (f, i) { return '<sheet name="' + echapper(f.nom) + '" sheetId="' + (i + 1) + '" r:id="rId' + (i + 1) + '"/>'; }).join("") +
+      "</sheets></workbook>";
+    var classeurRels = ENTETE_XML + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      feuilles.map(function (f, i) { return '<Relationship Id="rId' + (i + 1) + '" Type="' + NS_R + '/worksheet" Target="worksheets/sheet' + (i + 1) + '.xml"/>'; }).join("") +
+      '<Relationship Id="rId' + (feuilles.length + 1) + '" Type="' + NS_R + '/styles" Target="styles.xml"/></Relationships>';
+    var entrees = [
+      { nom: "[Content_Types].xml", texte: types },
+      { nom: "_rels/.rels", texte: rels },
+      { nom: "xl/workbook.xml", texte: classeurXml },
+      { nom: "xl/_rels/workbook.xml.rels", texte: classeurRels },
+      { nom: "xl/styles.xml", texte: STYLES_XML }
+    ].concat(feuilles.map(function (f, i) { return { nom: "xl/worksheets/sheet" + (i + 1) + ".xml", texte: feuilleXml(f, i === 0) }; }));
+    return zip(entrees.map(function (e) { return { nom: e.nom, octets: utf8(e.texte) }; }), quand);
+  }
+
+  return { crc32: crc32, utf8: utf8, zip: zip, classeur: classeur, serieDate: serieDate, STYLES: STYLES,
+    TYPE: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" };
+})();
+if (typeof module !== "undefined") module.exports = Xlsx;
 </script>
 <script id="interface">
 "use strict";
@@ -840,6 +1738,26 @@ if (typeof module !== "undefined") module.exports = Moteur;
   var dernier = null;
   /* Libellés des fréquences, lus depuis les paramètres de la simulation exportée (pas depuis le DOM courant). */
   var LIBELLES_FREQUENCE = { hebdomadaire: "Hebdomadaire", mensuelle: "Mensuelle", trimestrielle: "Trimestrielle", annuelle: "Annuelle", aucune: "Aucun versement" };
+  /* Lot L6.2 : enveloppes fiscales et champs des taux (identifiant du champ → clé de Moteur.FISCALITE.taux). */
+  var LIBELLES_ENVELOPPE = { brut: "Aucune fiscalité (brut)", pea: "PEA", cto: "Compte-titres (PFU)", "assurance-vie": "Assurance-vie", exonere: "Exonéré (Livret A, LDDS)" };
+  var LIBELLES_FOYER = { seul: "Personne seule", couple: "Couple soumis à imposition commune" };
+  var CHAMPS_TAUX = [
+    { id: "tauxIr", cle: "impotForfaitaire", nom: "Le taux d'impôt", pct: true },
+    { id: "tauxPs", cle: "prelevementsSociaux", nom: "Le taux des prélèvements sociaux", pct: true },
+    { id: "tauxPsAv", cle: "prelevementsSociauxAssuranceVie", nom: "Le taux des prélèvements sociaux", pct: true },
+    { id: "tauxAvReduit", cle: "assuranceVieReduit", nom: "Le taux réduit", pct: true },
+    { id: "abattementSeul", cle: "abattementSeul", nom: "L'abattement" },
+    { id: "abattementCouple", cle: "abattementCouple", nom: "L'abattement" },
+    { id: "seuilAv", cle: "assuranceVieSeuilPrimes", nom: "Le seuil" },
+    { id: "plafondPea", cle: "plafondPea", nom: "Le plafond" }
+  ];
+  var CHAMPS_FRAIS = ["fraisEntree", "fraisGestion"];
+  /* Lot L6.3 : champs du scénario B (comparaison A/B) ; chaque champ de B a son équivalent dans A (CHAMPS_COPIE_B). */
+  var CHAMPS_B = ["versementInitialB", "versementRegulierB", "rendementB", "fraisEntreeB", "fraisGestionB"];
+  var CHAMPS_COPIE_B = ["versementInitial", "versementRegulier", "frequence", "rendement", "fraisEntree", "fraisGestion", "enveloppe"];
+  var etatB = null;
+  /* Lot L6.4 : fourchette Monte-Carlo (bloc <script id="montecarlo">), seulement si l'interrupteur « Afficher une fourchette » est activé. */
+  var etatMc = null;
   /* Arrondi au centime pour l'affichage : évite « -0,00 € » dû aux arrondis flottants. */
   function auCentime(v) { return (Math.round(v * 100) / 100) || 0; }
   function eur(v) { return euros.format(auCentime(v)); }
@@ -864,7 +1782,7 @@ if (typeof module !== "undefined") module.exports = Moteur;
   }
 
   function effacerErreurs() {
-    ["dateDebut", "dateFin", "versementInitial", "versementRegulier", "rendement", "inflation"].forEach(function (id) {
+    ["dateDebut", "dateFin", "versementInitial", "versementRegulier", "rendement", "inflation"].concat(CHAMPS_FRAIS, CHAMPS_TAUX.map(function (c) { return c.id; }), CHAMPS_B, ["volatilite"]).forEach(function (id) {
       $(id).removeAttribute("aria-invalid"); $("err-" + id).textContent = "";
     });
     $("err-general").textContent = "";
@@ -881,8 +1799,53 @@ if (typeof module !== "undefined") module.exports = Moteur;
       versementRegulier: lireNombre("versementRegulier", "Le versement régulier", { positif: true, vide: 0 }),
       frequence: $("frequence").value,
       rendementAnnuel: lireNombre("rendement", "Le rendement", { vide: 0 }) / 100,
-      inflation: { mode: mode, taux: lireNombre("inflation", "L'inflation", { vide: 0 }) / 100 }
+      inflation: { mode: mode, taux: lireNombre("inflation", "L'inflation", { vide: 0 }) / 100 },
+      fraisEntree: lirePourcentage("fraisEntree", "Les frais d'entrée", true),
+      fraisGestion: lirePourcentage("fraisGestion", "Les frais de gestion", true),
+      fiscalite: lireFiscalite()
     };
+  }
+  /* Lot L6.2 : pourcentage saisi, rendu en fraction ; vide = 0. Frais : 100 % exclu ; taux fiscaux : 100 % inclus. */
+  function lirePourcentage(id, nom, exclure100) {
+    var v = lireNombre(id, nom, { vide: 0 });
+    /* Corrections L6.2 (R1) : accord au pluriel pour les frais (« Les frais d'entrée ne peuvent pas être négatifs »). */
+    if (v < 0) throw { champ: id, message: nom + (exclure100 ? " ne peuvent pas être négatifs." : " ne peut pas être négatif.") };
+    if (exclure100 ? v >= 100 : v > 100) throw { champ: id, message: nom + (exclure100 ? " doivent être inférieurs à 100 %." : " ne peut pas dépasser 100 %.") };
+    /* Arrondi à 10^-8 : 18,6 % donne exactement 0.186 (18,6 / 100 donnerait 0.18600000000000003 dans les exports). */
+    return Math.round(v * 1e6) / 1e8;
+  }
+  /* Lot L6.4, corrections F-C3 et F-R2 : volatilité en %, de 0 à 100 ; champ vide signalé (pas de 0 % implicite). */
+  function lireVolatilite() {
+    if (String($("volatilite").value).trim() === "") throw { champ: "volatilite", message: "Champ vide : saisissez une volatilité (0 pour un rendement constant)." };
+    var v = lireNombre("volatilite", "La volatilité", {});
+    if (v < 0) throw { champ: "volatilite", message: "La volatilité ne peut pas être négative." };
+    if (v > 100) throw { champ: "volatilite", message: "La volatilité ne peut pas dépasser 100 %." };
+    return Math.round(v * 1e6) / 1e8;
+  }
+  function lireFiscalite() {
+    var taux = {};
+    CHAMPS_TAUX.forEach(function (c) {
+      /* Corrections L6.2 (R2) : un champ du volet vidé est signalé (ni 0 % ni valeur implicite). */
+      if (String($(c.id).value).trim() === "") throw { champ: c.id, message: "Champ vide : saisissez une valeur, ou utilisez « Rétablir les taux vérifiés »." };
+      taux[c.cle] = c.pct ? lirePourcentage(c.id, c.nom, false) : lireNombre(c.id, c.nom, { positif: true, vide: Moteur.FISCALITE.taux[c.cle] });
+    });
+    return { enveloppe: $("enveloppe").value || "brut", foyer: $("foyer").value || "seul", taux: taux };
+  }
+
+  /* Lot L6.3 : le scénario B reprend les paramètres de A (dates, inflation, foyer, taux fiscaux) et remplace ceux de son panneau. */
+  function comparaisonActive() { return $("comparer").checked === true; }
+  function fourchetteActive() { return $("fourchette").checked === true && typeof MonteCarlo !== "undefined"; }
+  function lireParametresB(p) {
+    var q = {};
+    for (var k in p) if (Object.prototype.hasOwnProperty.call(p, k)) q[k] = p[k];
+    q.versementInitial = lireNombre("versementInitialB", "Le versement initial de B", { positif: true, vide: 0 });
+    q.versementRegulier = lireNombre("versementRegulierB", "Le versement régulier de B", { positif: true, vide: 0 });
+    q.frequence = $("frequenceB").value;
+    q.rendementAnnuel = lireNombre("rendementB", "Le rendement de B", { vide: 0 }) / 100;
+    q.fraisEntree = lirePourcentage("fraisEntreeB", "Les frais d'entrée de B", true);
+    q.fraisGestion = lirePourcentage("fraisGestionB", "Les frais de gestion de B", true);
+    q.fiscalite = { enveloppe: $("enveloppeB").value || "brut", foyer: p.fiscalite.foyer, taux: p.fiscalite.taux };
+    return q;
   }
 
   function kpi(libelle, valeur, detail, classe, variante) {
@@ -898,7 +1861,9 @@ if (typeof module !== "undefined") module.exports = Moteur;
       var verse = tranche.reduce(function (s, m) { return s + m.versementDuMois; }, a === 0 ? p.versementInitial : 0);
       var interets = tranche.reduce(function (s, m) { return s + m.interetsDuMois; }, 0);
       var fin = tranche[tranche.length - 1];
-      lignes.push({ annee: a + 1, mois: tranche.length, date: fin.date, verse: verse, verseCumule: fin.verseCumule, interets: interets, valeur: fin.valeur, valeurReelle: fin.valeurReelle });
+      var fraisAvant = debutAnnee > 0 ? r.mois[debutAnnee - 1].fraisCumules : 0;
+      lignes.push({ annee: a + 1, mois: tranche.length, date: fin.date, verse: verse, verseCumule: fin.verseCumule, interets: interets, valeur: fin.valeur, valeurReelle: fin.valeurReelle,
+        frais: fin.fraisCumules - fraisAvant, fraisCumules: fin.fraisCumules, valeurApresFrais: fin.valeurApresFrais });
       debutAnnee += 12;
     }
     return lignes;
@@ -980,12 +1945,87 @@ if (typeof module !== "undefined") module.exports = Moteur;
     } else { alerte.hidden = true; alerte.textContent = ""; }
   }
 
+  /* Lot L6.2 : colonnes « Frais cumulés » et « Valeur après frais » affichées seulement si des frais sont saisis
+     (sans frais, elles répéteraient 0 et la valeur nominale) ; les exports les contiennent toujours. */
   function afficherTableau(lignes) {
+    var avecFrais = lignes.length > 0 && lignes[lignes.length - 1].fraisCumules > 0;
+    $("th-frais-cumules").hidden = !avecFrais; $("th-apres-frais").hidden = !avecFrais;
     $("corps-tableau").innerHTML = lignes.map(function (l) {
       var badge = l.mois < 12 ? '<span class="partiel">' + l.mois + ' mois</span>' : "";
       return "<tr><td>Année " + l.annee + badge + "</td><td>" + eur(l.verse) + "</td><td>" + eur(l.verseCumule) +
-        '</td><td class="' + signe(l.interets) + '">' + eur(l.interets) + "</td><td>" + eur(l.valeur) + "</td><td>" + eur(l.valeurReelle) + "</td></tr>";
+        '</td><td class="' + signe(l.interets) + '">' + eur(l.interets) + "</td><td>" + eur(l.valeur) + "</td>" +
+        (avecFrais ? "<td>" + eur(l.fraisCumules) + "</td><td>" + eur(l.valeurApresFrais) + "</td>" : "") + "<td>" + eur(l.valeurReelle) + "</td></tr>";
     }).join("");
+  }
+
+  /* ---------- Lot L6.2 : frais et fiscalité ---------- */
+  var pctFiscal = new Intl.NumberFormat("fr-FR", { style: "percent", maximumFractionDigits: 2 });
+  function dureeTexte(n) {
+    var a = Math.floor(n / 12), m = n % 12;
+    return (a ? a + (a > 1 ? " ans" : " an") : "") + (a && m ? " et " : "") + (m ? m + " mois" : "") || "0 mois";
+  }
+  /* Montants réels en euros de la date de départ : montants de la date de fin divisés par le déflateur final. */
+  function bilanFiscal(r, f) {
+    var t = r.totaux, d = t.deflateurFinal;
+    return {
+      brut: t.valeurFinale, brutReel: t.valeurFinaleReelle,
+      coutFrais: t.valeurFinale - t.valeurApresFrais, coutFraisReel: t.valeurFinaleReelle - t.valeurApresFraisReelle,
+      apresFrais: t.valeurApresFrais, apresFraisReel: t.valeurApresFraisReelle,
+      impotRevenu: f.impotRevenu, impotRevenuReel: f.impotRevenu / d,
+      prelevements: f.prelevementsSociaux, prelevementsReel: f.prelevementsSociaux / d,
+      net: f.valeurNette, netReel: f.valeurNette / d,
+      gainNet: f.valeurNette - t.totalVerse, gainNetReel: f.valeurNette / d - t.totalVerseReel
+    };
+  }
+  function regimeFiscal(f, n) {
+    var t = f.taux, anc = "ancienneté " + dureeTexte(n) + " à la date de fin";
+    if (f.enveloppe === "brut") return "Aucune fiscalité : résultats avant impôt.";
+    if (f.enveloppe === "exonere") return "Exonéré (Livret A, LDDS) : ni impôt sur le revenu ni prélèvements sociaux sur les intérêts.";
+    if (f.enveloppe === "cto") return "Compte-titres : plus-value taxée au PFU, " + pctFiscal.format(t.impotForfaitaire) + " d'impôt et " +
+      pctFiscal.format(t.prelevementsSociaux) + " de prélèvements sociaux, soit " + pctFiscal.format(t.impotForfaitaire + t.prelevementsSociaux) + ".";
+    if (f.enveloppe === "pea") return f.seuilAtteint
+      ? "PEA, " + anc + " (5 ans atteints) : impôt sur le revenu exonéré, prélèvements sociaux de " + pctFiscal.format(t.prelevementsSociaux) + "."
+      : "PEA, " + anc + " (moins de 5 ans) : " + pctFiscal.format(t.impotForfaitaire) + " d'impôt et " + pctFiscal.format(t.prelevementsSociaux) + " de prélèvements sociaux.";
+    return f.seuilAtteint
+      ? "Assurance-vie, " + anc + " (8 ans atteints) : abattement de " + eur(f.foyer === "couple" ? t.abattementCouple : t.abattementSeul) +
+        " (" + LIBELLES_FOYER[f.foyer].toLowerCase() + "), puis " + pctFiscal.format(t.assuranceVieReduit) + " sur la part afférente à " +
+        eur(t.assuranceVieSeuilPrimes) + " de primes (" + pctFiscal.format(f.partReduite) + " des produits ; primes versées au " + dateFr(f.datePrimes) + " : " +
+        eur(f.primes) + ") et " + pctFiscal.format(t.impotForfaitaire) +
+        " au-delà ; prélèvements sociaux de " + pctFiscal.format(t.prelevementsSociauxAssuranceVie) + "."
+      : "Assurance-vie, " + anc + " (moins de 8 ans) : " + pctFiscal.format(t.impotForfaitaire) + " d'impôt et " +
+        pctFiscal.format(t.prelevementsSociauxAssuranceVie) + " de prélèvements sociaux.";
+  }
+  function texteAvertissement(a) {
+    if (a.code === "plafond-pea") return "Vos versements (" + eur(a.versements) + ") dépassent le plafond du PEA (" + eur(a.plafond) + ") : au-delà, un PEA n'accepte plus de versement. Le calcul les garde, à titre indicatif.";
+    if (a.code === "plafond-livret-a") return "Vos versements (" + eur(a.versements) + ") dépassent le plafond du Livret A (" + eur(a.plafond) + ").";
+    if (a.code === "plafond-ldds") return "Vos versements (" + eur(a.versements) + ") dépassent le plafond du LDDS (" + eur(a.plafond) + ").";
+    if (a.code === "moins-value") return "Pas de plus-value à la date de fin (" + eur(a.plusValue) + ") : aucun impôt ni prélèvement social.";
+    return "";
+  }
+  function afficherFiscalite(r, f) {
+    var b = bilanFiscal(r, f), t = r.totaux;
+    /* Corrections L6.3 (A-C1) : le choix du foyer s'affiche dès que A, ou B si la comparaison est active, est en assurance-vie. */
+    $("champ-foyer").hidden = f.enveloppe !== "assurance-vie" && !(comparaisonActive() && $("enveloppeB").value === "assurance-vie");
+    $("fiscal-regime").textContent = regimeFiscal(f, r.nombreMois);
+    var lignes = [
+      ["Valeur finale brute", b.brut, b.brutReel, ""],
+      ["Coût des frais", -b.coutFrais, -b.coutFraisReel, ""],
+      ["Valeur après frais", b.apresFrais, b.apresFraisReel, "etape-total"],
+      ["Impôt sur le revenu", -b.impotRevenu, -b.impotRevenuReel, ""],
+      ["Prélèvements sociaux", -b.prelevements, -b.prelevementsReel, ""],
+      ["Valeur nette d'impôt", b.net, b.netReel, "etape-total"],
+      ["Gain net", b.gainNet, b.gainNetReel, "etape-gain"]
+    ];
+    $("corps-fiscal").innerHTML = lignes.map(function (l) {
+      var cl = /gain/.test(l[3]) ? function (v) { return ' class="' + signe(v) + '"'; } : function () { return ""; };
+      return '<tr' + (l[3] ? ' class="' + l[3] + '"' : "") + "><td>" + l[0] + "</td><td" + cl(l[1]) + ">" + eur(l[1]) + "</td><td" + cl(l[2]) + ">" + eur(l[2]) + "</td></tr>";
+    }).join("");
+    $("fiscal-detail").textContent = "Frais payés : " + eur(t.fraisEntree) + " à l'entrée, " + eur(t.fraisGestion) + " de gestion, soit " + eur(t.fraisTotal) +
+      ". Le coût des frais compte aussi les intérêts perdus. Plus-value à la date de fin : " + eur(f.plusValue) + ".";
+    $("fiscal-alertes").innerHTML = f.avertissements.map(function (a) { return '<p class="avertissement" role="status">' + texteAvertissement(a) + "</p>"; }).join("");
+  }
+  function viderFiscalite() {
+    $("fiscal-regime").textContent = ""; $("corps-fiscal").innerHTML = ""; $("fiscal-detail").textContent = ""; $("fiscal-alertes").innerHTML = "";
   }
 
   /* Graduation « ronde » de l'axe des montants. */
@@ -995,6 +2035,12 @@ if (typeof module !== "undefined") module.exports = Moteur;
   }
 
   var G = { l: 68, r: 18, t: 16, b: 34, w: 720, h: 320 };
+  /* Lot L6.3 : nom accessible du graphique, hors comparaison (texte du HTML) et en comparaison. */
+  var ARIA_GRAPHIQUE = "Courbes du total versé, de la valeur nominale et de la valeur réelle. Utilisez la souris ou les flèches gauche et droite pour inspecter chaque mois.";
+  var ARIA_GRAPHIQUE_AB = "Comparaison A/B : courbes du total versé, de la valeur nominale et de la valeur réelle du scénario A, et de la valeur nominale et de la valeur réelle du scénario B, après frais. Utilisez la souris ou les flèches gauche et droite pour inspecter chaque mois.";
+  var ariaGraphiqueAB = false;
+  var ARIA_GRAPHIQUE_MC = " Zone grisée bornée de pointillés : fourchette de la valeur nominale, du 10e au 90e centile de 1 000 tirages (Monte-Carlo) à chaque date ; trait mixte : médiane.";
+  var ariaGraphiqueMc = false;
   var etatGraphique = null;
 
   function afficherPointGraphique(k) {
@@ -1008,8 +2054,8 @@ if (typeof module !== "undefined") module.exports = Moteur;
     g.series.forEach(function (serie) {
       var pt = $("pt-" + serie.cle);
       if (pt) {
-        pt.setAttribute("cx", cx.toFixed(1));
-        pt.setAttribute("cy", g.y(serie.valeurs[k]).toFixed(1));
+        if (/^b-/.test(serie.cle)) { pt.setAttribute("x", (cx - 4.5).toFixed(1)); pt.setAttribute("y", (g.y(serie.valeurs[k]) - 4.5).toFixed(1)); }
+        else { pt.setAttribute("cx", cx.toFixed(1)); pt.setAttribute("cy", g.y(serie.valeurs[k]).toFixed(1)); }
         pt.setAttribute("visibility", "visible");
       }
     });
@@ -1023,6 +2069,20 @@ if (typeof module !== "undefined") module.exports = Moteur;
       '<div class="bulle-ligne"><span class="bulle-cle"><span class="bulle-point" style="background:var(--nominal)"></span>Nominal</span><span class="bulle-val">' + eur(vNom) + '</span></div>' +
       '<div class="bulle-ligne"><span class="bulle-cle"><span class="bulle-point" style="background:var(--reel)"></span>Réel</span><span class="bulle-val">' + eur(vReel) + '</span></div>' +
       '<div class="bulle-ligne"><span class="bulle-cle">Gain réel</span><span class="bulle-val ' + signe(gainReelPoint) + '">' + eur(gainReelPoint) + '</span></div>';
+    /* Lot L6.3 : en comparaison, A est nommé et B ajouté (valeurs après frais pour les deux). */
+    if (g.series.length > 3) {
+      bulle.innerHTML = bulle.innerHTML.replace(/<\/span>(Versé|Nominal|Réel)<\/span>/g, "</span>A · $1</span>").replace(">Gain réel<", ">A · gain réel<") +
+        '<div class="bulle-ligne"><span class="bulle-cle"><span class="bulle-carre" style="background:var(--scenario-b)"></span>B · nominal</span><span class="bulle-val">' + eur(g.series[3].valeurs[k]) + '</span></div>' +
+        '<div class="bulle-ligne"><span class="bulle-cle"><span class="bulle-carre" style="background:var(--scenario-b)"></span>B · réel</span><span class="bulle-val">' + eur(g.series[4].valeurs[k]) + '</span></div>';
+    }
+    /* Lot L6.4 : fourchette du mois (10e et 90e centiles, médiane) de la valeur nominale tracée. */
+    if (g.mc) {
+      var cm = g.mc[k];
+      /* Corrections L6.4 (F-C1, F-R3) : une ligne par centile, montants à l'euro : la bulle reste aussi étroite que sans fourchette. */
+      bulle.innerHTML += '<div class="bulle-ligne"><span class="bulle-cle"><span>90<sup>e</sup> centile</span></span><span class="bulle-val">' + eurosRond.format(cm.p90) + '</span></div>' +
+        '<div class="bulle-ligne"><span class="bulle-cle">Médiane</span><span class="bulle-val">' + eurosRond.format(cm.p50) + '</span></div>' +
+        '<div class="bulle-ligne"><span class="bulle-cle"><span>10<sup>e</sup> centile</span></span><span class="bulle-val">' + eurosRond.format(cm.p10) + '</span></div>';
+    }
     bulle.hidden = false;
     var rect = svg.getBoundingClientRect(), echelle = rect.width > 0 ? G.w / rect.width : 1;
     var gauche = cx / echelle + 14;
@@ -1035,7 +2095,7 @@ if (typeof module !== "undefined") module.exports = Moteur;
     var bulle = $("bulle"), curseur = $("curseur");
     if (bulle) bulle.hidden = true;
     if (curseur) curseur.setAttribute("visibility", "hidden");
-    ["verse", "valeur", "reel"].forEach(function (cle) {
+    ["verse", "valeur", "reel", "b-valeur", "b-reel"].forEach(function (cle) {
       var pt = $("pt-" + cle);
       if (pt) pt.setAttribute("visibility", "hidden");
     });
@@ -1054,8 +2114,20 @@ if (typeof module !== "undefined") module.exports = Moteur;
       { cle: "valeur", couleur: "var(--nominal)", valeurs: [p.versementInitial].concat(r.mois.map(function (m) { return m.valeur; })) },
       { cle: "reel", couleur: "var(--reel)", valeurs: [p.versementInitial].concat(r.mois.map(function (m) { return m.valeurReelle; })) }
     ];
+    /* Lot L6.3 : en comparaison, A et B sont tracés après frais (avant impôt) ; sans frais, ce sont les mêmes valeurs. */
+    var b = etatB;
+    if (b) {
+      var depart = function (q) { return q.versementInitial * (1 - q.fraisEntree); };
+      series[1].valeurs = [depart(p)].concat(r.mois.map(function (m) { return m.valeurApresFrais; }));
+      series[2].valeurs = [depart(p)].concat(r.mois.map(function (m) { return m.valeurApresFraisReelle; }));
+      series.push({ cle: "b-valeur", couleur: "var(--scenario-b)", valeurs: [depart(b.p)].concat(b.r.mois.map(function (m) { return m.valeurApresFrais; })) },
+        { cle: "b-reel", couleur: "var(--scenario-b)", valeurs: [depart(b.p)].concat(b.r.mois.map(function (m) { return m.valeurApresFraisReelle; })) });
+    }
     var max = Math.max.apply(null, series.map(function (s) { return Math.max.apply(null, s.valeurs); }));
     var min = Math.min(0, Math.min.apply(null, series.map(function (s) { return Math.min.apply(null, s.valeurs); })));
+    /* Lot L6.4 : la fourchette suit la valeur nominale tracée pour A (avant frais ; après frais en comparaison A/B). */
+    var bandeMc = etatMc ? (b ? etatMc.bande.valeurApresFrais : etatMc.bande.valeur) : null;
+    if (bandeMc) bandeMc.forEach(function (c) { if (c.p90 > max) max = c.p90; if (c.p10 < min) min = c.p10; });
     if (max - min < 1) max = min + 100;
     var pas = pasRond(max - min, 5), haut = Math.ceil(max / pas) * pas, bas = Math.floor(min / pas) * pas;
     var x = function (k) { return G.l + (G.w - G.l - G.r) * k / n; };
@@ -1086,10 +2158,26 @@ if (typeof module !== "undefined") module.exports = Moteur;
     var ptsReel = series[2].valeurs.map(function (v, k) { return x(k).toFixed(1) + "," + y(v).toFixed(1); }).join(" ");
     var aireReel = x(0).toFixed(1) + "," + yZero + " " + ptsReel + " " + x(n).toFixed(1) + "," + yZero;
     s += '<polygon fill="url(#gradReel)" points="' + aireReel + '"/>';
+    if (bandeMc) {
+      var pt = function (c, cle, k) { return x(k).toFixed(1) + "," + y(c[cle]).toFixed(1); };
+      var haut90 = bandeMc.map(function (c, k) { return pt(c, "p90", k); }), bas10 = bandeMc.map(function (c, k) { return pt(c, "p10", k); });
+      s += '<polygon class="zone-mc" fill="var(--bande-mc)" points="' + haut90.join(" ") + " " + bas10.slice().reverse().join(" ") + '"/>';
+      s += '<polyline class="borne-mc" data-centile="90" fill="none" stroke="var(--doux)" stroke-width="1" stroke-dasharray="1.5 3" points="' + haut90.join(" ") + '"/>';
+      s += '<polyline class="borne-mc" data-centile="10" fill="none" stroke="var(--doux)" stroke-width="1" stroke-dasharray="1.5 3" points="' + bas10.join(" ") + '"/>';
+      s += '<polyline class="mediane-mc" fill="none" stroke="var(--nominal)" stroke-width="1.6" stroke-dasharray="6 2 1.5 2" stroke-linecap="butt" points="' + bandeMc.map(function (c, k) { return pt(c, "p50", k); }).join(" ") + '"/>';
+    }
 
     /* Courbes et points de repère terminaux */
     series.forEach(function (serie) {
       var pts = serie.valeurs.map(function (v, k) { return x(k).toFixed(1) + "," + y(v).toFixed(1); }).join(" ");
+      /* Lot L6.3 : courbes de B (tirets longs, pointillés), posées sur un liseré de la couleur de la carte, marqueur carré. */
+      if (serie.cle === "b-valeur" || serie.cle === "b-reel") {
+        var traitB = serie.cle === "b-valeur" ? ' stroke-width="2.4" stroke-dasharray="10 5"' : ' stroke-width="2.75" stroke-dasharray="0.5 5.5"';
+        s += '<polyline class="lisere-b" fill="none" stroke="var(--carte)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" points="' + pts + '"/>';
+        s += '<polyline class="courbe-b" data-serie="' + serie.cle + '" fill="none" stroke="' + serie.couleur + '"' + traitB + ' stroke-linecap="round" stroke-linejoin="round" points="' + pts + '"/>';
+        s += '<rect x="' + (x(n) - 4).toFixed(1) + '" y="' + (y(serie.valeurs[n]) - 4).toFixed(1) + '" width="8" height="8" fill="' + serie.couleur + '" stroke="var(--carte)" stroke-width="2"/>';
+        return;
+      }
       var styleTrait = serie.cle === "verse" ? ' stroke-width="2" stroke-dasharray="5 4"' : (serie.cle === "reel" ? ' stroke-width="2.75"' : ' stroke-width="2.4"');
       s += '<polyline fill="none" stroke="' + serie.couleur + '"' + styleTrait + ' stroke-linecap="round" stroke-linejoin="round" points="' + pts + '"/>';
       s += '<circle cx="' + x(n).toFixed(1) + '" cy="' + y(serie.valeurs[n]).toFixed(1) + '" r="4" fill="' + serie.couleur + '" stroke="var(--carte)" stroke-width="2"/>';
@@ -1098,12 +2186,20 @@ if (typeof module !== "undefined") module.exports = Moteur;
     /* Curseur et marqueurs dynamiques */
     s += '<line id="curseur" y1="' + G.t + '" y2="' + (G.h - G.b) + '" stroke="var(--doux)" stroke-width="1.2" stroke-dasharray="3 3" visibility="hidden"/>';
     series.forEach(function (serie) {
-      s += '<circle id="pt-' + serie.cle + '" r="4.5" fill="' + serie.couleur + '" stroke="var(--carte)" stroke-width="2" visibility="hidden"/>';
+      /* Corrections L6.3 (R1) : repère mobile carré pour B, rond pour A, comme les marqueurs terminaux. */
+      if (/^b-/.test(serie.cle)) s += '<rect id="pt-' + serie.cle + '" class="repere-b" width="9" height="9" fill="' + serie.couleur + '" stroke="var(--carte)" stroke-width="2" visibility="hidden"/>';
+      else s += '<circle id="pt-' + serie.cle + '" r="4.5" fill="' + serie.couleur + '" stroke="var(--carte)" stroke-width="2" visibility="hidden"/>';
     });
+    if (b) svg.setAttribute("aria-label", ARIA_GRAPHIQUE_AB); else if (ariaGraphiqueAB) svg.setAttribute("aria-label", ARIA_GRAPHIQUE);
+    ariaGraphiqueAB = !!b;
+    /* Lot L6.4 : nom accessible complété par la fourchette ; rétabli sans elle. */
+    if (bandeMc) svg.setAttribute("aria-label", (b ? ARIA_GRAPHIQUE_AB : ARIA_GRAPHIQUE) + ARIA_GRAPHIQUE_MC);
+    else if (ariaGraphiqueMc) svg.setAttribute("aria-label", b ? ARIA_GRAPHIQUE_AB : ARIA_GRAPHIQUE);
+    ariaGraphiqueMc = !!bandeMc;
     s += '<rect id="zone" x="' + G.l + '" y="' + G.t + '" width="' + (G.w - G.l - G.r) + '" height="' + (G.h - G.t - G.b) + '" fill="transparent"/>';
     svg.innerHTML = s;
 
-    etatGraphique = { r: r, p: p, n: n, series: series, x: x, y: y, indexActif: null };
+    etatGraphique = { r: r, p: p, n: n, series: series, x: x, y: y, indexActif: null, mc: bandeMc };
     var zone = $("zone");
     function depuisClientX(clientX) {
       var rect = svg.getBoundingClientRect(), echelle = rect.width > 0 ? G.w / rect.width : 1;
@@ -1127,20 +2223,321 @@ if (typeof module !== "undefined") module.exports = Moteur;
       ["Versement initial (€)", nombreCsv.format(p.versementInitial)],
       ["Versement régulier (€)", nombreCsv.format(p.versementRegulier)], ["Fréquence", LIBELLES_FREQUENCE[p.frequence] || p.frequence],
       ["Rendement annuel (%)", nombreCsv.format(p.rendementAnnuel * 100)],
-      ["Inflation annuelle (%)", nombreCsv.format(t.inflationAnnuelle * 100)], ["Inflation cumulée (%)", nombreCsv.format(t.inflationCumulee * 100)],
-      [],
-      ["Année", "Mois", "Échéance de fin d'année", "Versé dans l'année (€)", "Versé cumulé (€)", "Intérêts de l'année (€)", "Valeur nominale (€)", "Valeur réelle (€)"]
+      ["Inflation annuelle (%)", nombreCsv.format(t.inflationAnnuelle * 100)], ["Inflation cumulée (%)", nombreCsv.format(t.inflationCumulee * 100)]
     ];
+    var f = dernier.f, tx = f.taux, b = bilanFiscal(dernier.r, f);
+    lignes.push(["Frais d'entrée (%)", nombreCsv.format(p.fraisEntree * 100)], ["Frais de gestion annuels (%)", nombreCsv.format(p.fraisGestion * 100)],
+      ["Enveloppe fiscale", LIBELLES_ENVELOPPE[f.enveloppe]], ["Foyer (abattement assurance-vie)", LIBELLES_FOYER[f.foyer]],
+      ["Impôt forfaitaire PFU (%)", nombreCsv.format(tx.impotForfaitaire * 100)], ["Prélèvements sociaux (%)", nombreCsv.format(tx.prelevementsSociaux * 100)],
+      ["Prélèvements sociaux assurance-vie (%)", nombreCsv.format(tx.prelevementsSociauxAssuranceVie * 100)], ["Assurance-vie après 8 ans (%)", nombreCsv.format(tx.assuranceVieReduit * 100)],
+      ["Abattement personne seule (€)", nombreCsv.format(tx.abattementSeul)], ["Abattement couple (€)", nombreCsv.format(tx.abattementCouple)],
+      ["Seuil de primes assurance-vie (€)", nombreCsv.format(tx.assuranceVieSeuilPrimes)], ["Plafond PEA (€)", nombreCsv.format(tx.plafondPea)],
+      ["Taux fiscaux vérifiés le", dateFr(Moteur.FISCALITE.verification)]);
+    lignes.push([], ["Année", "Mois", "Échéance de fin d'année", "Versé dans l'année (€)", "Versé cumulé (€)", "Intérêts de l'année (€)", "Valeur nominale (€)", "Valeur réelle (€)",
+      "Frais de l'année (€)", "Frais cumulés (€)", "Valeur après frais (€)"]);
     dernier.lignes.forEach(function (l) {
-      lignes.push([l.annee, l.mois, dateFr(l.date), nombreCsv.format(l.verse), nombreCsv.format(l.verseCumule), nombreCsv.format(l.interets), nombreCsv.format(l.valeur), nombreCsv.format(l.valeurReelle)]);
+      lignes.push([l.annee, l.mois, dateFr(l.date), nombreCsv.format(l.verse), nombreCsv.format(l.verseCumule), nombreCsv.format(l.interets), nombreCsv.format(l.valeur), nombreCsv.format(l.valeurReelle),
+        nombreCsv.format(l.frais), nombreCsv.format(l.fraisCumules), nombreCsv.format(l.valeurApresFrais)]);
     });
     lignes.push([]);
     lignes.push(["Total versé (€)", nombreCsv.format(t.totalVerse)], ["Valeur finale (€)", nombreCsv.format(t.valeurFinale)],
       ["Gain nominal (€)", nombreCsv.format(t.gain)], ["Gain réel (€)", nombreCsv.format(t.gainReel)]);
+    lignes.push(["Frais d'entrée payés (€)", nombreCsv.format(t.fraisEntree)], ["Frais de gestion payés (€)", nombreCsv.format(t.fraisGestion)],
+      ["Valeur finale après frais (€)", nombreCsv.format(b.apresFrais)], ["Valeur finale après frais réelle (€)", nombreCsv.format(b.apresFraisReel)],
+      ["Plus-value à la date de fin (€)", nombreCsv.format(f.plusValue)],
+      ["Primes arrêtées au (assurance-vie)", dateFr(f.datePrimes)], ["Primes à cette date (€)", nombreCsv.format(f.primes)],
+      ["Impôt sur le revenu (€)", nombreCsv.format(f.impotRevenu)],
+      ["Prélèvements sociaux (€)", nombreCsv.format(f.prelevementsSociaux)], ["Valeur nette d'impôt (€)", nombreCsv.format(b.net)],
+      ["Valeur nette d'impôt réelle (€)", nombreCsv.format(b.netReel)], ["Gain net (€)", nombreCsv.format(b.gainNet)], ["Gain net réel (€)", nombreCsv.format(b.gainNetReel)],
+      ["Avertissement", AVERTISSEMENT_FISCAL]);
+    if (dernier.ab) lignesCsvComparaison(lignes, dernier.ab);
+    if (dernier.mc) lignesCsvFourchette(lignes, dernier.mc);
     var texte = "\ufeff" + lignes.map(function (l) { return l.map(function (c) { c = String(c); return /[;"\n]/.test(c) ? '"' + c.replace(/"/g, '""') + '"' : c; }).join(";"); }).join("\r\n");
     var lien = document.createElement("a");
     lien.href = URL.createObjectURL(new Blob([texte], { type: "text/csv;charset=utf-8" }));
     lien.download = "CadenceDCA-simulation-" + aujourdHui().replace(/-/g, "") + ".csv";
+    document.body.appendChild(lien); lien.click(); lien.remove();
+    setTimeout(function () { URL.revokeObjectURL(lien.href); }, 1000);
+  }
+
+  /* ---------- Lot L6.3 : comparaison A/B (affichage et exports) ---------- */
+  var RESULTATS_AB = [
+    ["totalVerse", "Total versé"], ["valeurFinale", "Valeur finale nominale"], ["valeurFinaleReelle", "Valeur finale réelle"],
+    ["valeurApresFrais", "Valeur après frais"], ["valeurApresFraisReelle", "Valeur après frais réelle"],
+    ["valeurNette", "Valeur nette d'impôt"], ["valeurNetteReelle", "Valeur nette d'impôt réelle"],
+    ["fraisTotal", "Frais cumulés"], ["gainNet", "Gain net"]
+  ];
+  function pctTexte(f) { return nombreChamp.format(Math.round(f * 1e8) / 1e6) + " %"; }
+  function parametresAB(cmp) {
+    var pa = cmp.a.p, pb = cmp.b.p;
+    return [
+      ["Versement initial", eur(pa.versementInitial), eur(pb.versementInitial), pa.versementInitial, pb.versementInitial, "euro"],
+      ["Versement régulier", eur(pa.versementRegulier), eur(pb.versementRegulier), pa.versementRegulier, pb.versementRegulier, "euro"],
+      ["Fréquence", LIBELLES_FREQUENCE[pa.frequence] || pa.frequence, LIBELLES_FREQUENCE[pb.frequence] || pb.frequence, null, null, "texte"],
+      ["Rendement annuel", pctTexte(pa.rendementAnnuel), pctTexte(pb.rendementAnnuel), pa.rendementAnnuel, pb.rendementAnnuel, "pct"],
+      ["Frais d'entrée", pctTexte(pa.fraisEntree), pctTexte(pb.fraisEntree), pa.fraisEntree, pb.fraisEntree, "pct"],
+      ["Frais de gestion annuels", pctTexte(pa.fraisGestion), pctTexte(pb.fraisGestion), pa.fraisGestion, pb.fraisGestion, "pct"],
+      ["Enveloppe fiscale", LIBELLES_ENVELOPPE[cmp.a.f.enveloppe], LIBELLES_ENVELOPPE[cmp.b.f.enveloppe], null, null, "texte"]
+    ];
+  }
+  /* Écart affiché avec son signe : « + » si B est plus élevé, « - » s'il est plus bas, sans couleur porteuse de sens. */
+  function ecartTexte(v) { var c = auCentime(v); return (c > 0 ? "+" : "") + eur(c); }
+  function avertissementsB(cmp) { return cmp.b.f.avertissements.map(texteAvertissement); }
+  function afficherComparaison(cmp) {
+    var actif = !!cmp;
+    $("comparaison-ab").hidden = !actif;
+    $("legende-b-nominal").hidden = !actif; $("legende-b-reel").hidden = !actif;
+    $("note-graphique-ab").hidden = !actif; $("note-tableau-ab").hidden = !actif;
+    PREFIXES_A.forEach(function (el) { if (el) el.hidden = !actif; });
+    $("foyer-commun").hidden = !actif;
+    if (!actif) { $("corps-ab").innerHTML = ""; $("ab-differences").textContent = ""; $("ab-alertes").innerHTML = ""; $("ab-conclusion").textContent = ""; return; }
+    /* Corrections L6.3 (Graphiste) : espace insécable devant « : ». */
+    var diffs = parametresAB(cmp).filter(function (l) { return l[1] !== l[2]; }).map(function (l) { return l[0].toLowerCase() + " " + l[2] + " (A\u00a0: " + l[1] + ")"; });
+    $("ab-differences").textContent = diffs.length ? "B diffère de A par\u00a0: " + diffs.join(" ; ") + "."
+      : "B est identique à A : modifiez un paramètre du scénario B ou choisissez un raccourci.";
+    /* Corrections L6.3 (A-C2) : avertissements fiscaux propres à B, nommés, recalculés à chaque calcul. */
+    $("ab-alertes").innerHTML = avertissementsB(cmp).map(function (texte) { return '<p class="avertissement" role="status"><strong>Scénario B&nbsp;:</strong> ' + texte + "</p>"; }).join("");
+    $("corps-ab").innerHTML = RESULTATS_AB.map(function (l) {
+      var a = cmp.a.resultats[l[0]], b = cmp.b.resultats[l[0]];
+      return '<tr><th scope="row">' + l[1] + '</th><td><span class="etiq-m">Scénario A</span><span>' + eur(a) + '</span></td><td><span class="etiq-m">Scénario B</span><span>' + eur(b) +
+        '</span></td><td><span class="etiq-m">Écart B − A</span><span>' + ecartTexte(cmp.ecart[l[0]]) + "</span></td></tr>";
+    }).join("");
+    var e = auCentime(cmp.ecart.valeurNette), base = cmp.a.resultats.valeurNette;
+    $("ab-conclusion").textContent = "Valeur nette d'impôt : " + eur(cmp.b.resultats.valeurNette) + " pour B, " + eur(base) + " pour A, soit " +
+      (e === 0 ? "le même montant." : ecartTexte(e) + (base > 0 ? " (" + (e > 0 ? "+" : "") + pct.format(e / base) + ")" : "") + (e > 0 ? " en faveur de B." : " en faveur de A."));
+  }
+  function lignesCsvComparaison(lignes, cmp) {
+    var c = function (v) { return nombreCsv.format(auCentime(v)); };
+    lignes.push([], ["Comparaison A/B"], ["Paramètre", "Scénario A", "Scénario B"]);
+    parametresAB(cmp).forEach(function (l) {
+      if (l[5] === "texte") lignes.push([l[0], l[1], l[2]]);
+      else lignes.push([l[0] + (l[5] === "euro" ? " (€)" : " (%)"), l[5] === "euro" ? c(l[3]) : nombreCsv.format(l[3] * 100), l[5] === "euro" ? c(l[4]) : nombreCsv.format(l[4] * 100)]);
+    });
+    lignes.push(["Communs à A et B", "dates, inflation, abattement de l'assurance-vie et taux fiscaux"]);
+    avertissementsB(cmp).forEach(function (texte) { lignes.push(["Avertissement du scénario B", texte]); });
+    lignes.push([], ["Résultat", "Scénario A", "Scénario B", "Écart B − A"]);
+    RESULTATS_AB.forEach(function (l) { lignes.push([l[1] + " (€)", c(cmp.a.resultats[l[0]]), c(cmp.b.resultats[l[0]]), c(cmp.ecart[l[0]])]); });
+    lignes.push([], ["Scénario B, année par année"], ["Année", "Mois", "Échéance de fin d'année", "Versé dans l'année (€)", "Versé cumulé (€)", "Intérêts de l'année (€)", "Valeur nominale (€)", "Valeur réelle (€)",
+      "Frais de l'année (€)", "Frais cumulés (€)", "Valeur après frais (€)"]);
+    cmp.lignesB.forEach(function (l) {
+      lignes.push([l.annee, l.mois, dateFr(l.date), nombreCsv.format(l.verse), nombreCsv.format(l.verseCumule), nombreCsv.format(l.interets), nombreCsv.format(l.valeur), nombreCsv.format(l.valeurReelle),
+        nombreCsv.format(l.frais), nombreCsv.format(l.fraisCumules), nombreCsv.format(l.valeurApresFrais)]);
+    });
+  }
+  function feuillesXlsxComparaison(cmp) {
+    var gras = function (v) { return { v: v, s: "gras" }; };
+    var eu = function (v) { return { v: auCentime(v), s: "euro" }; };
+    var pc = function (v) { return { v: v, s: "pct" }; };
+    var jour = function (iso) { return { v: iso, s: "date" }; };
+    var entier = function (v) { return { v: v, s: "entier" }; };
+    var annuel = [["Année", "Mois", "Échéance de fin d'année", "Versé dans l'année (€)", "Versé cumulé (€)", "Intérêts de l'année (€)", "Valeur nominale (€)", "Valeur réelle (€)",
+      "Frais de l'année (€)", "Frais cumulés (€)", "Valeur après frais (€)"].map(gras)];
+    cmp.lignesB.forEach(function (l) {
+      annuel.push([entier(l.annee), entier(l.mois), jour(l.date), eu(l.verse), eu(l.verseCumule), eu(l.interets), eu(l.valeur), eu(l.valeurReelle),
+        eu(l.frais), eu(l.fraisCumules), eu(l.valeurApresFrais)]);
+    });
+    var comparaison = [[gras("Paramètre"), gras("Scénario A"), gras("Scénario B")]];
+    parametresAB(cmp).forEach(function (l) {
+      comparaison.push(l[5] === "texte" ? [l[0], l[1], l[2]] : [l[0] + (l[5] === "euro" ? " (€)" : ""), l[5] === "euro" ? eu(l[3]) : pc(l[3]), l[5] === "euro" ? eu(l[4]) : pc(l[4])]);
+    });
+    comparaison.push(["Communs à A et B", { v: "dates, inflation, abattement de l'assurance-vie et taux fiscaux", s: "long" }]);
+    avertissementsB(cmp).forEach(function (texte) { comparaison.push(["Avertissement du scénario B", { v: texte, s: "long" }]); });
+    comparaison.push([],
+      [gras("Résultat"), gras("Scénario A"), gras("Scénario B"), gras("Écart B − A")]);
+    RESULTATS_AB.forEach(function (l) { comparaison.push([l[1] + " (€)", eu(cmp.a.resultats[l[0]]), eu(cmp.b.resultats[l[0]]), eu(cmp.ecart[l[0]])]); });
+    comparaison.push([], ["Valeurs à la date de fin ; « réelle » : en euros du " + dateFr(cmp.a.p.dateDebut) + " ; écart : B moins A."]);
+    return [
+      { nom: "Scénario B", lignes: annuel, colonnes: [10, 7, 24, 23, 18, 23, 21, 19, 20, 18, 22], figer: true },
+      { nom: "Comparaison A-B", lignes: comparaison, colonnes: [34, 22, 22, 20], figer: true }
+    ];
+  }
+
+  /* ---------- Lot L6.4 : fourchette Monte-Carlo (affichage et exports) ---------- */
+  var RESULTATS_MC = [
+    ["valeurFinale", "Valeur finale nominale"], ["valeurFinaleReelle", "Valeur finale réelle"],
+    ["valeurApresFrais", "Valeur après frais"], ["valeurApresFraisReelle", "Valeur après frais réelle"],
+    ["valeurNette", "Valeur nette d'impôt"], ["valeurNetteReelle", "Valeur nette d'impôt réelle"]
+  ];
+  var AVERTISSEMENT_MC = "Simulation, pas un conseil ; les performances passées ne préjugent pas des performances futures. " +
+    "Profils : hypothèses de CadenceDCA. La fourchette donne, à chaque date, le 10e et le 90e centile des valeurs simulées : " +
+    "ce ne sont pas des bornes, une même trajectoire peut en sortir puis y revenir.";
+  var METHODE_MC = "Rendements annuels tirés d'une loi log-normale (moyenne et volatilité ci-dessus), indépendants d'une année à l'autre ; " +
+    "générateur mulberry32 à graine fixe ; centiles interpolés entre valeurs triées.";
+  function profilMc(mc) {
+    var pr = null;
+    MonteCarlo.PROFILS.forEach(function (q) { if (Math.abs(q.rendement / 100 - mc.rendement) < 1e-9 && Math.abs(q.volatilite / 100 - mc.volatilite) < 1e-9) pr = q; });
+    return pr;
+  }
+  function majProfilsMc() {
+    if (typeof MonteCarlo === "undefined") return;
+    var lire = function (id) { var t = String($(id).value).replace(/[\s  %]/g, "").replace(",", "."); return t === "" ? NaN : Number(t); };
+    var r = lire("rendement"), v = lire("volatilite"), actif = null;
+    MonteCarlo.PROFILS.forEach(function (q) {
+      var egal = Math.abs(r - q.rendement) < 1e-9 && Math.abs(v - q.volatilite) < 1e-9;
+      $("mc-" + q.id).setAttribute("aria-pressed", egal ? "true" : "false");
+      if (egal) actif = q;
+    });
+    $("aide-profil-mc").textContent = actif ? "Profil " + actif.nom + " : " + actif.resume + ". Hypothèse de CadenceDCA, sources en bas de page." : "";
+  }
+  function afficherFourchette(mc) {
+    var actif = !!mc;
+    $("fourchette-mc").hidden = !actif;
+    $("legende-mc-zone").hidden = !actif; $("legende-mc-mediane").hidden = !actif; $("note-graphique-mc").hidden = !actif;
+    if (!actif) { $("corps-mc").innerHTML = ""; $("mc-explication").textContent = ""; $("mc-detail").textContent = ""; $("note-graphique-mc").textContent = ""; return; }
+    var p = mc.scenario.p, t = mc.scenario.r.totaux, avecFrais = p.fraisEntree > 0 || p.fraisGestion > 0, fiscal = mc.scenario.f.enveloppe !== "brut";
+    var lignes = RESULTATS_MC.filter(function (l) { return /^valeurFinale/.test(l[0]) || (/^valeurApresFrais/.test(l[0]) && avecFrais) || (/^valeurNette/.test(l[0]) && fiscal); });
+    $("corps-mc").innerHTML = lignes.map(function (l) {
+      var c = mc.final[l[0]];
+      return '<tr><th scope="row">' + l[1] + '</th><td><span class="etiq-m">Pessimiste (10<sup>e</sup> centile)</span><span>' + eur(c.p10) + '</span></td><td><span class="etiq-m">Médiane</span><span>' + eur(c.p50) +
+        '</span></td><td><span class="etiq-m">Optimiste (90<sup>e</sup> centile)</span><span>' + eur(c.p90) + "</span></td></tr>";
+    }).join("");
+    var pr = profilMc(mc), f = mc.final.valeurFinale, comp = !!dernier.ab;
+    var cleNette = fiscal ? "valeur nette d'impôt" : (avecFrais ? "valeur après frais" : "valeur finale");
+    $("mc-explication").textContent = "Les marchés ne montent pas du même taux chaque année. CadenceDCA a tiré " + mc.tirages.toLocaleString("fr-FR") +
+      " suites de rendements annuels, de moyenne " + pctTexte(mc.rendement) + " et de volatilité " + pctTexte(mc.volatilite) + " par an" +
+      (pr ? " (profil « " + pr.nom + " »)" : "") + " : " + (mc.volatilite === 0
+        ? "avec une volatilité nulle, les " + mc.tirages.toLocaleString("fr-FR") + " tirages sont identiques et la valeur finale nominale vaut " + eur(f.p50) + " dans chacun."
+        : "à la date de fin, environ 8 tirages sur 10 ont une valeur finale nominale entre " + eur(f.p10) + " (10e centile) et " + eur(f.p90) +
+          " (90e centile) ; la médiane, " + eur(f.p50) + ", partage les tirages en deux moitiés.") + " Dans " + pct.format(mc.partSousVerse) + " des tirages, la " + cleNette +
+      " finit sous le total versé (" + eur(t.totalVerse) + ").";
+    $("mc-detail").textContent = "La volatilité mesure l'écart habituel du rendement d'une année autour de sa moyenne : plus elle est forte, plus la fourchette est large" +
+      (mc.volatilite === 0 ? " (à 0 %, elle se réduit à la courbe à rendement constant)" : "") + ". Rendement constant de " + pctTexte(mc.rendement) + " : " + eur(t.valeurFinale) +
+      " (" + (comp ? "avant frais" : "la courbe du graphique") + "). La médiane est en général plus basse : une baisse pèse plus qu'une hausse de même taille (−20 % puis +20 % laissent −4 %). " +
+      "Mêmes paramètres, mêmes résultats (graine fixe)." + (mc.volatilite === 0 ? "" : " Avec 1 000 tirages, les centiles sont des estimations : leurs derniers chiffres ne sont pas significatifs. Ils sont donnés au centime pour correspondre aux exports.") + (comp ? " En comparaison A/B, la fourchette porte sur le scénario A seulement, pour garder le graphique lisible." : "");
+    $("note-graphique-mc").textContent = "Fourchette" + (comp ? " du scénario A, après frais comme ses courbes" : "") + " : " + (mc.volatilite === 0
+      ? "volatilité nulle, les tirages sont identiques ; la zone se réduit à la courbe."
+      : "à chaque date, la zone grisée bornée de pointillés va du 10e au 90e centile des valeurs simulées. Une même trajectoire peut en sortir puis y revenir.");
+    $("legende-mc-texte").innerHTML = (comp ? "A&nbsp;: f" : "F") + "ourchette de la valeur nominale (10<sup>e</sup> à 90<sup>e</sup> centile)";
+    $("legende-mc-mediane-texte").innerHTML = (comp ? "A&nbsp;: m" : "M") + "édiane des tirages (trait mixte)";
+  }
+  function parametresMc(mc) {
+    var pr = profilMc(mc);
+    return [["Profil", pr ? pr.nom : "Saisie de l'utilisateur"], ["Rendement annuel moyen (%)", nombreCsv.format(mc.rendement * 100)],
+      ["Volatilité annuelle (%)", nombreCsv.format(mc.volatilite * 100)], ["Nombre de tirages", mc.tirages], ["Graine du générateur", mc.graine]];
+  }
+  function lignesCsvFourchette(lignes, mc) {
+    var c = function (v) { return nombreCsv.format(auCentime(v)); };
+    lignes.push([], ["Fourchette Monte-Carlo" + (dernier.ab ? " (scénario A)" : "")]);
+    parametresMc(mc).forEach(function (l) { lignes.push(l); });
+    lignes.push(["Méthode", METHODE_MC], ["Avertissement de la fourchette", AVERTISSEMENT_MC]);
+    lignes.push(["Résultat à la date de fin", "Pessimiste, 10e centile", "Médiane", "Optimiste, 90e centile"]);
+    RESULTATS_MC.forEach(function (l) { var v = mc.final[l[0]]; lignes.push([l[1] + " (€)", c(v.p10), c(v.p50), c(v.p90)]); });
+    lignes.push(["Part des tirages sous le total versé, valeur nette (%)", nombreCsv.format(mc.partSousVerse * 100)]);
+    lignes.push([], ["Centiles annuels"], ["Année", "Mois", "Échéance de fin d'année", "Nominal 10e centile (€)", "Nominal médiane (€)", "Nominal 90e centile (€)",
+      "Réel 10e centile (€)", "Réel médiane (€)", "Réel 90e centile (€)", "Après frais 10e centile (€)", "Après frais médiane (€)", "Après frais 90e centile (€)"]);
+    mc.annees.forEach(function (a) {
+      lignes.push([a.annee, a.mois, dateFr(a.date), c(a.valeur.p10), c(a.valeur.p50), c(a.valeur.p90), c(a.valeurReelle.p10), c(a.valeurReelle.p50), c(a.valeurReelle.p90),
+        c(a.valeurApresFrais.p10), c(a.valeurApresFrais.p50), c(a.valeurApresFrais.p90)]);
+    });
+  }
+  function feuilleXlsxFourchette(mc) {
+    var gras = function (v) { return { v: v, s: "gras" }; };
+    var eu = function (v) { return { v: auCentime(v), s: "euro" }; };
+    var pc = function (v) { return { v: v, s: "pct" }; };
+    var entier = function (v) { return { v: v, s: "entier" }; };
+    var jour = function (iso) { return { v: iso, s: "date" }; };
+    var pr = profilMc(mc);
+    var l = [[gras("Fourchette Monte-Carlo" + (dernier.ab ? " (scénario A)" : ""))],
+      ["Profil", pr ? pr.nom : "Saisie de l'utilisateur"], ["Rendement annuel moyen", pc(mc.rendement)], ["Volatilité annuelle", pc(mc.volatilite)],
+      ["Nombre de tirages", entier(mc.tirages)], ["Graine du générateur", entier(mc.graine)],
+      ["Méthode", { v: METHODE_MC, s: "long" }], ["Avertissement de la fourchette", { v: AVERTISSEMENT_MC, s: "long" }], [],
+      [gras("Résultat à la date de fin"), gras("Pessimiste, 10e centile"), gras("Médiane"), gras("Optimiste, 90e centile")]];
+    RESULTATS_MC.forEach(function (r) { var v = mc.final[r[0]]; l.push([r[1] + " (€)", eu(v.p10), eu(v.p50), eu(v.p90)]); });
+    l.push(["Part des tirages sous le total versé, valeur nette", pc(mc.partSousVerse)], [], [gras("Centiles annuels")],
+      ["Année", "Mois", "Échéance de fin d'année", "Nominal 10e centile (€)", "Nominal médiane (€)", "Nominal 90e centile (€)", "Réel 10e centile (€)", "Réel médiane (€)",
+        "Réel 90e centile (€)", "Après frais 10e centile (€)", "Après frais médiane (€)", "Après frais 90e centile (€)"].map(gras));
+    mc.annees.forEach(function (a) {
+      l.push([entier(a.annee), entier(a.mois), jour(a.date), eu(a.valeur.p10), eu(a.valeur.p50), eu(a.valeur.p90), eu(a.valeurReelle.p10), eu(a.valeurReelle.p50), eu(a.valeurReelle.p90),
+        eu(a.valeurApresFrais.p10), eu(a.valeurApresFrais.p50), eu(a.valeurApresFrais.p90)]);
+    });
+    return [{ nom: "Fourchette", lignes: l, colonnes: [44, 22, 22, 22, 20, 20, 20, 20, 20, 22, 22, 22] }];
+  }
+  /* Lot L6.1b : export Excel (XLSX), écrit par le bloc <script id="xlsx"> ; mêmes règles que le CSV (voir exporterAJour). */
+  var VERSION_APPLI = "0.3.0";
+  var AVERTISSEMENT_XLSX = "Simulation, pas un conseil. Les résultats reposent sur un rendement et une inflation constants, " +
+    "saisis par l'utilisateur : ce ne sont pas des prévisions, et les rendements passés ne préjugent pas des rendements futurs.";
+  /* Lot L6.2 : avertissement fiscal des exports (même sens que #avertissement-fiscal). */
+  var AVERTISSEMENT_FISCAL = "Simulation, pas un conseil. Estimation fiscale simplifiée : sortie totale à la date de fin, taux vérifiés le " +
+    "25/11/2026 appliqués quelle que soit la date, situation personnelle non prise en compte.";
+  var SOURCES_FISCALES = "Service-Public.fr F21618 (15/04/2026), F2329 (30/06/2026), F22414 (15/04/2026), F2365 et F2368 (01/08/2026) ; " +
+    "impots.gouv.fr, L'assurance-vie et le PEA (08/04/2026) ; BOFiP BOI-RPPM-RCM-20-15 § 190 et BOI-RPPM-RCM-20-10-20-50 § 288 ; " +
+    "loi n° 2025-1403 du 30/12/2025, article 12. Détail : section Sources des données de la page.";
+  /* Source de l'inflation : le bloc assistants marque le champ quand il le remplit depuis la série Insee (attributs
+     data-insee-*). La mention ne vaut que si la valeur et le mode d'inflation n'ont pas changé depuis. */
+  function sourceInflation(p) {
+    var champ = $("inflation"), valeur = champ.getAttribute("data-insee-valeur");
+    if (valeur !== null && valeur === String(champ.value).trim() && champ.getAttribute("data-insee-mode") === p.inflation.mode)
+      return champ.getAttribute("data-insee-source") || "Insee";
+    return "Saisie de l'utilisateur.";
+  }
+  function feuillesXlsx() {
+    var p = dernier.p, t = dernier.r.totaux;
+    var gras = function (v) { return { v: v, s: "gras" }; };
+    var eu = function (v) { return { v: auCentime(v), s: "euro" }; };
+    var pc = function (v) { return { v: v, s: "pct" }; };
+    var jour = function (iso) { return { v: iso, s: "date" }; };
+    var entier = function (v) { return { v: v, s: "entier" }; };
+    var simulation = [["Année", "Mois", "Échéance de fin d'année", "Versé dans l'année (€)", "Versé cumulé (€)", "Intérêts de l'année (€)", "Valeur nominale (€)", "Valeur réelle (€)",
+      "Frais de l'année (€)", "Frais cumulés (€)", "Valeur après frais (€)"].map(gras)];
+    dernier.lignes.forEach(function (l) {
+      simulation.push([entier(l.annee), entier(l.mois), jour(l.date), eu(l.verse), eu(l.verseCumule), eu(l.interets), eu(l.valeur), eu(l.valeurReelle),
+        eu(l.frais), eu(l.fraisCumules), eu(l.valeurApresFrais)]);
+    });
+    var f = dernier.f, tx = f.taux, b = bilanFiscal(dernier.r, f);
+    var parametres = [
+      [gras("Rubrique"), gras("Valeur")],
+      ["Application", "CadenceDCA " + VERSION_APPLI],
+      ["Date de l'export", jour(aujourdHui())],
+      [],
+      [gras("Paramètres saisis")],
+      ["Date de départ", jour(p.dateDebut)], ["Date de fin", jour(p.dateFin)],
+      ["Versement initial (€)", eu(p.versementInitial)], ["Versement régulier (€)", eu(p.versementRegulier)],
+      ["Fréquence", LIBELLES_FREQUENCE[p.frequence] || p.frequence],
+      ["Rendement annuel", pc(p.rendementAnnuel)],
+      ["Mode d'inflation saisi", p.inflation.mode === "cumulee" ? "Cumul sur la période" : "Taux annuel moyen"],
+      ["Inflation saisie", pc(p.inflation.taux)],
+      [],
+      [gras("Inflation utilisée")],
+      ["Inflation annuelle moyenne", pc(t.inflationAnnuelle)], ["Inflation cumulée sur la période", pc(t.inflationCumulee)],
+      ["Source de l'inflation", { v: sourceInflation(p), s: "long" }],
+      [],
+      [gras("Résultats")],
+      ["Total versé (€)", eu(t.totalVerse)], ["Valeur finale (€)", eu(t.valeurFinale)],
+      ["Gain nominal (€)", eu(t.gain)], ["Gain réel (€, en euros du " + dateFr(p.dateDebut) + ")", eu(t.gainReel)],
+      [],
+      [gras("Frais et fiscalité")],
+      ["Frais d'entrée", pc(p.fraisEntree)], ["Frais de gestion annuels", pc(p.fraisGestion)],
+      ["Enveloppe fiscale", LIBELLES_ENVELOPPE[f.enveloppe]], ["Foyer (abattement assurance-vie)", LIBELLES_FOYER[f.foyer]],
+      ["Régime appliqué", { v: regimeFiscal(f, dernier.r.nombreMois), s: "long" }],
+      ["Impôt forfaitaire PFU", pc(tx.impotForfaitaire)], ["Prélèvements sociaux", pc(tx.prelevementsSociaux)],
+      ["Prélèvements sociaux assurance-vie", pc(tx.prelevementsSociauxAssuranceVie)], ["Assurance-vie après 8 ans", pc(tx.assuranceVieReduit)],
+      ["Abattement personne seule (€)", eu(tx.abattementSeul)], ["Abattement couple (€)", eu(tx.abattementCouple)],
+      ["Seuil de primes assurance-vie (€)", eu(tx.assuranceVieSeuilPrimes)], ["Plafond PEA (€)", eu(tx.plafondPea)],
+      ["Taux fiscaux vérifiés le", jour(Moteur.FISCALITE.verification)], ["Sources des taux", { v: SOURCES_FISCALES, s: "long" }],
+      ["Frais d'entrée payés (€)", eu(t.fraisEntree)], ["Frais de gestion payés (€)", eu(t.fraisGestion)],
+      ["Valeur finale après frais (€)", eu(b.apresFrais)], ["Valeur finale après frais réelle (€)", eu(b.apresFraisReel)],
+      ["Plus-value à la date de fin (€)", eu(f.plusValue)],
+      ["Primes arrêtées au (assurance-vie)", jour(f.datePrimes)], ["Primes à cette date (€)", eu(f.primes)],
+      ["Impôt sur le revenu (€)", eu(f.impotRevenu)], ["Prélèvements sociaux (€)", eu(f.prelevementsSociaux)],
+      ["Valeur nette d'impôt (€)", eu(b.net)], ["Valeur nette d'impôt réelle (€)", eu(b.netReel)],
+      ["Gain net (€)", eu(b.gainNet)], ["Gain net réel (€, en euros du " + dateFr(p.dateDebut) + ")", eu(b.gainNetReel)],
+      [],
+      [gras("Avertissement"), { v: AVERTISSEMENT_XLSX, s: "long" }],
+      [gras("Avertissement fiscal"), { v: AVERTISSEMENT_FISCAL, s: "long" }]
+    ];
+    var feuilles = [
+      { nom: "Simulation", lignes: simulation, colonnes: [10, 7, 24, 23, 18, 23, 21, 19, 20, 18, 22], figer: true },
+      { nom: "Paramètres", lignes: parametres, colonnes: [38, 80], figer: true }
+    ];
+    if (dernier.ab) feuilles = feuilles.concat(feuillesXlsxComparaison(dernier.ab));
+    return dernier.mc ? feuilles.concat(feuilleXlsxFourchette(dernier.mc)) : feuilles;
+  }
+  function exporterXlsx() {
+    if (!dernier) return;
+    var octets = Xlsx.classeur(feuillesXlsx(), new Date());
+    var lien = document.createElement("a");
+    lien.href = URL.createObjectURL(new Blob([octets], { type: Xlsx.TYPE }));
+    lien.download = "CadenceDCA-simulation-" + aujourdHui().replace(/-/g, "") + ".xlsx";
     document.body.appendChild(lien); lien.click(); lien.remove();
     setTimeout(function () { URL.revokeObjectURL(lien.href); }, 1000);
   }
@@ -1157,7 +2554,10 @@ if (typeof module !== "undefined") module.exports = Moteur;
     $("synthese").innerHTML = '<div class="carte kpi"><div class="libelle">Résultats</div><div class="detail">Corrigez la saisie signalée pour relancer le calcul.</div></div>';
     if ($("decomposition")) { $("decomposition").hidden = true; $("decomposition").innerHTML = ""; }
     $("graphique").innerHTML = ""; $("bulle").hidden = true; $("corps-tableau").innerHTML = "";
-    $("alerte-perte").hidden = true; $("export").disabled = true;
+    $("alerte-perte").hidden = true; $("export").disabled = true; $("export-xlsx").disabled = true;
+    viderFiscalite();
+    etatB = null; afficherComparaison(null);
+    etatMc = null; afficherFourchette(null);
   }
 
   function calculer() {
@@ -1166,24 +2566,53 @@ if (typeof module !== "undefined") module.exports = Moteur;
     try {
       p = lireParametres();
       var r = Moteur.simuler(p);
+      var pr = Moteur.primesAu31Decembre(p, r);
+      var f = Moteur.fiscalite({ enveloppe: p.fiscalite.enveloppe, foyer: p.fiscalite.foyer, taux: p.fiscalite.taux,
+        valeur: r.totaux.valeurApresFrais, verse: r.totaux.totalVerse, nombreMois: r.nombreMois, primes: pr.montant });
+      f.datePrimes = pr.date;
+      /* Lot L6.3 : scénario B, seulement si l'interrupteur « Comparer » est activé. */
+      var cmp = null;
+      if (comparaisonActive()) {
+        var pB = lireParametresB(p);
+        try { cmp = Moteur.comparer(p, pB); } catch (eB) {
+          var mB = eB && eB.message ? eB.message : String(eB);
+          throw { champ: /rendement/i.test(mB) ? "rendementB" : /frais d'entrée/.test(mB) ? "fraisEntreeB" : /frais de gestion/.test(mB) ? "fraisGestionB" : null, message: mB };
+        }
+      }
+      /* Lot L6.4 : fourchette Monte-Carlo du scénario A, seulement si l'interrupteur « Afficher une fourchette » est activé. */
+      var mc = null;
+      if (fourchetteActive()) mc = MonteCarlo.simuler(p, { volatilite: lireVolatilite() });
     } catch (e) {
       var message = e && e.message ? e.message : String(e);
       var champ = e && e.champ ? e.champ
+        : /frais d'entrée/.test(message) ? "fraisEntree"
+        : /frais de gestion/.test(message) ? "fraisGestion"
         : /date de fin|période|postérieure/.test(message) ? "dateFin"
         : /date de départ/.test(message) ? "dateDebut"
         : /rendement/i.test(message) ? "rendement"
         : /inflation/i.test(message) ? "inflation" : null;
-      if (champ) { $(champ).setAttribute("aria-invalid", "true"); $("err-" + champ).textContent = message; }
-      else { $("err-general").textContent = message; }
+      if (champ) {
+        $(champ).setAttribute("aria-invalid", "true"); $("err-" + champ).textContent = message;
+        /* Corrections L6.2 (R3, C3) : erreur dans le volet des taux : le volet s'ouvre pour montrer le message.
+           Le message général n'est écrit que pour une erreur sans champ (C3 : pas de message en double). */
+        if (CHAMPS_TAUX.some(function (c) { return c.id === champ; })) $("details-taux").open = true;
+      } else { $("err-general").textContent = message; }
       viderResultats();
       return;
     }
     var lignes = parAnnee(r, p);
-    dernier = { p: p, r: r, lignes: lignes };
-    $("export").disabled = false;
+    if (cmp) suivreMessageB(JSON.stringify([p, cmp.b.p]));
+    dernier = { p: p, r: r, lignes: lignes, f: f };
+    if (cmp) { cmp.lignesB = parAnnee(cmp.b.r, cmp.b.p); dernier.ab = cmp; etatB = { p: cmp.b.p, r: cmp.b.r }; } else etatB = null;
+    if (mc) dernier.mc = mc;
+    etatMc = mc;
+    $("export").disabled = false; $("export-xlsx").disabled = false;
     afficherSynthese(r, p);
+    afficherFiscalite(r, f);
     afficherGraphique(r, p);
     afficherTableau(lignes);
+    afficherComparaison(cmp);
+    afficherFourchette(mc);
   }
 
   var minuterie = null;
@@ -1191,6 +2620,7 @@ if (typeof module !== "undefined") module.exports = Moteur;
   /* Export : annule le recalcul différé et recalcule tout de suite depuis la saisie courante,
      pour que le fichier corresponde à l'écran. Saisie invalide : résultats effacés, aucun téléchargement. */
   function exporterAJour() { clearTimeout(minuterie); minuterie = null; calculer(); exporterCsv(); }
+  function exporterXlsxAJour() { clearTimeout(minuterie); minuterie = null; calculer(); exporterXlsx(); }
 
   $("dateDebut").value = aujourdHui();
   $("dateFin").value = plusAnnees(aujourdHui(), 10);
@@ -1199,6 +2629,74 @@ if (typeof module !== "undefined") module.exports = Moteur;
   $("formulaire").addEventListener("change", function (e) { if (e.target.name === "modeInflation") majLibelleInflation(); planifier(); });
   $("formulaire").addEventListener("submit", function (e) { e.preventDefault(); calculer(); });
   $("export").addEventListener("click", exporterAJour);
+  $("export-xlsx").addEventListener("click", exporterXlsxAJour);
+  /* Lot L6.2 : « Rétablir les taux vérifiés » remet les champs aux valeurs de Moteur.FISCALITE, puis recalcule. */
+  var nombreChamp = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 });
+  $("taux-defaut").addEventListener("click", function () {
+    CHAMPS_TAUX.forEach(function (c) { var v = Moteur.FISCALITE.taux[c.cle]; $(c.id).value = nombreChamp.format(c.pct ? Math.round(v * 1e6) / 1e4 : v); });
+    planifier();
+  });
+  /* ---------- Lot L6.3 : interrupteur « Comparer », copie de A dans B, raccourcis ---------- */
+  var PREFIXES_A = ["prefixe-a-1", "prefixe-a-2", "prefixe-a-3"].map($);
+  function signalerSaisie(el) { if (el.dispatchEvent && typeof Event === "function") el.dispatchEvent(new Event("input", { bubbles: true })); }
+  function copierAversB() { CHAMPS_COPIE_B.forEach(function (id) { $(id + "B").value = $(id).value; }); }
+  function recalculerMaintenant() { clearTimeout(minuterie); minuterie = null; calculer(); }
+  /* Corrections L6.3 (F-C3) : un message de raccourci vaut pour les paramètres qui suivent son clic ; il est effacé à toute
+     saisie dans le formulaire, et au calcul suivant si A ou B ont changé autrement (profil, taux rétablis…). */
+  var signatureMessageB = null;
+  function messageB(texte) { $("message-b").textContent = texte; signatureMessageB = texte ? "?" : null; }
+  function suivreMessageB(signature) {
+    if (signatureMessageB === "?") signatureMessageB = signature;
+    else if (signatureMessageB !== null && signatureMessageB !== signature) messageB("");
+  }
+  $("formulaire").addEventListener("input", function () { if (signatureMessageB !== null) messageB(""); });
+  function majComparaison(copier) {
+    var actif = comparaisonActive();
+    $("panneau-b").hidden = !actif;
+    if (actif && copier) copierAversB();
+    if (!actif) messageB("");
+    recalculerMaintenant();
+  }
+  function remplirA(id, valeur) { $(id).value = valeur; signalerSaisie($(id)); }
+  $("comparer").addEventListener("change", function () { majComparaison(true); });
+  $("recopier-a").addEventListener("click", function () { copierAversB(); messageB("Scénario B : copie du scénario A."); recalculerMaintenant(); });
+  $("raccourci-unique").addEventListener("click", function () {
+    var q;
+    try { q = Moteur.versementUnique(lireParametres()); } catch (e) { messageB("Corrigez d'abord le scénario A."); recalculerMaintenant(); return; }
+    copierAversB();
+    $("versementInitialB").value = nombreChamp.format(auCentime(q.versementInitial)); $("versementRegulierB").value = "0"; $("frequenceB").value = "aucune";
+    messageB("Scénario B : le total versé par A (" + eur(q.versementInitial) + ") est placé en une fois au départ, sans versement régulier.");
+    recalculerMaintenant();
+  });
+  $("raccourci-frais").addEventListener("click", function () {
+    remplirA("fraisGestion", "0,2"); copierAversB(); $("fraisGestionB").value = "1,5";
+    messageB("Frais de gestion : 0,2 % par an pour A, 1,5 % par an pour B ; le reste est identique.");
+    recalculerMaintenant();
+  });
+  $("raccourci-rendement").addEventListener("click", function () {
+    remplirA("rendement", "5"); copierAversB(); $("rendementB").value = "7";
+    messageB("Rendement annuel : 5 % pour A, 7 % pour B ; le reste est identique.");
+    recalculerMaintenant();
+  });
+  /* État initial (un navigateur peut restaurer la case cochée au rechargement) : panneau de B selon l'interrupteur. */
+  $("panneau-b").hidden = !comparaisonActive();
+  /* ---------- Lot L6.4 : interrupteur « Afficher une fourchette » et profils (rendement moyen, volatilité) ---------- */
+  $("fourchette").addEventListener("change", function () { $("panneau-mc").hidden = !fourchetteActive(); recalculerMaintenant(); });
+  if (typeof MonteCarlo !== "undefined") MonteCarlo.PROFILS.forEach(function (q) {
+    $("mc-" + q.id).addEventListener("click", function () {
+      var avant = String($("rendement").value).trim(), apres = nombreChamp.format(q.rendement);
+      $("volatilite").value = nombreChamp.format(q.volatilite);
+      remplirA("rendement", apres);
+      majProfilsMc();
+      /* Corrections L6.4 (F-C5) : le rendement saisi n'est pas remplacé en silence. */
+      $("aide-profil-mc").textContent = "Profil " + q.nom + " : " + q.resume + ". " +
+        (avant !== apres ? "Rendement annuel ci-dessus remplacé : " + (avant === "" ? "vide" : avant + " %") + " → " + apres + " %. " : "Rendement annuel inchangé. ") +
+        "Hypothèse de CadenceDCA, sources en bas de page.";
+    });
+  });
+  $("formulaire").addEventListener("input", majProfilsMc);
+  $("panneau-mc").hidden = !fourchetteActive();
+  majProfilsMc();
   $("graphique").addEventListener("keydown", function (e) {
     if (!etatGraphique) return;
     var pas = e.shiftKey ? 12 : 1;
@@ -1218,6 +2716,195 @@ if (typeof module !== "undefined") module.exports = Moteur;
   calculer();
 })();
 </script>
+<script id="donnees">
+"use strict";
+/* Données intégrées (lot L6.1) : série d'inflation Insee et profils de rendement. Code pur : aucun accès au DOM,
+   aucune requête. Les sources complètes sont affichées dans la section « Sources des données » de la page. */
+var Donnees = (function () {
+  /* Évolution annuelle moyenne de l'indice des prix à la consommation (IPC), en %, France hors Mayotte,
+     ensemble des ménages. Valeur de l'année A = moyenne annuelle de l'indice en A / moyenne annuelle en A-1, moins 1.
+     Source : Insee, « L'essentiel sur… l'inflation », tableau « Évolution annuelle moyenne de l'indice des prix
+     à la consommation », https://www.insee.fr/fr/statistiques/4268033, page publiée le 23/03/2026, extraite le 24/11/2026.
+     Rapprochement : 2005 et 2018 valent 1,8 et 1,9 sur cette page, mais 1,7 et 1,8 dans les publications Insee
+     d'origine ; ce sont ces dernières qui sont retenues (détail dans la section « Sources des données » de la page) :
+     - 2018 : Insee, Informations rapides n° 2019-9 du 15/01/2019, indices moyens 101,22 (2017) et 103,09 (2018), soit
+       +1,85 %, publié +1,8 % ; https://www.insee.fr/fr/statistiques/fichier/version-html/3695758/IPC-annuel_2018.pdf
+     - 2005 : Insee, Tableaux de l'économie française, édition 2020, « Prix à la consommation », 1,7 % ;
+       https://www.insee.fr/fr/statistiques/4277780
+     Réutilisation : conditions générales de l'Insee (art. 2.2), source et date de dernière mise à jour mentionnées. */
+  var IPC = {
+    premiere: 2000,
+    derniere: 2025,
+    variations: [1.7, 1.6, 1.9, 2.1, 2.1, 1.7, 1.7, 1.5, 2.8, 0.1, 1.5, 2.1, 2.0, 0.9, 0.5, 0.0, 0.2, 1.0, 1.8, 1.1, 0.5, 1.6, 5.2, 4.9, 2.0, 0.9],
+    source: "Insee, « L'essentiel sur… l'inflation », évolution annuelle moyenne de l'IPC, France hors Mayotte, ensemble des ménages (2005 et 2018 : publications Insee d'origine)",
+    url: "https://www.insee.fr/fr/statistiques/4268033",
+    miseAJour: "2026-03-23",
+    extraction: "2026-11-24"
+  };
+
+  /* Profils de rendement : hypothèses nominales, constantes, sourcées. Ce ne sont ni des prévisions ni des conseils. */
+  var PROFILS = [
+    { id: "prudent", nom: "Prudent", support: "Livret A", rendement: 1.7,
+      resume: "taux du Livret A, 1,7 % net d'impôt depuis le 1er août 2026",
+      source: "Service-Public.fr, « Épargne réglementée », taux du Livret A fixé à 1,7 % au 1er août 2026",
+      url: "https://www.service-public.gouv.fr/particuliers/actualites/A15818" },
+    { id: "modere", nom: "Modéré", support: "fonds en euros", rendement: 2.63,
+      resume: "rendement moyen 2025 des fonds en euros, 2,63 % net de frais, avant prélèvements sociaux",
+      source: "ACPR (Banque de France), Analyses et synthèses n° 180, « Revalorisation 2025 des contrats d'assurance-vie et de capitalisation »",
+      url: "https://acpr.banque-france.fr/system/files/2026-06/20260630_AS180_revalorisation_2025.pdf" },
+    { id: "dynamique", nom: "Dynamique", support: "actions", rendement: 5,
+      resume: "5 % par an, hypothèse prudente sous le rendement réel historique de 6,6 % par an des actions françaises",
+      source: "AMF, Lettre de l'Observatoire de l'épargne n° 6 (décembre 2013) : actions françaises dividendes réinvestis, rendement réel moyen de 6,6 % par an de janvier 1988 à juin 2013",
+      url: "https://www.amf-france.org/sites/institutionnel/files/contenu_simple/lettre_ou_cahier/lettre_observatoire/La%20lettre%20de%20l'Observatoire%20de%20l'epargne%20de%20l'AMF%20-%20ndeg%206%20-%20Decembre%202013.pdf" }
+  ];
+
+  function variation(annee) {
+    if (typeof annee !== "number" || annee % 1 !== 0 || annee < IPC.premiere || annee > IPC.derniere) return null;
+    return IPC.variations[annee - IPC.premiere] / 100;
+  }
+
+  /* Inflation cumulée entre la moyenne annuelle de anneeDebut et celle de anneeFin (fraction), ou null hors série.
+     anneeDebut peut valoir premiere - 1 : c'est l'année de référence de la première variation. */
+  function inflationCumulee(anneeDebut, anneeFin) {
+    if (typeof anneeDebut !== "number" || typeof anneeFin !== "number" || anneeDebut % 1 !== 0 || anneeFin % 1 !== 0) return null;
+    if (anneeDebut < IPC.premiere - 1 || anneeFin > IPC.derniere || anneeFin <= anneeDebut) return null;
+    var f = 1;
+    for (var a = anneeDebut + 1; a <= anneeFin; a++) f *= 1 + variation(a);
+    return f - 1;
+  }
+
+  /* Inflation annuelle moyenne (géométrique) des nb dernières années de la série (fraction), ou null. */
+  function moyenneDernieresAnnees(nb) {
+    if (typeof nb !== "number" || nb % 1 !== 0 || nb < 1 || nb > IPC.variations.length) return null;
+    return Math.pow(1 + inflationCumulee(IPC.derniere - nb, IPC.derniere), 1 / nb) - 1;
+  }
+
+  function annee(iso) { return /^\d{4}-\d{2}-\d{2}$/.test(iso || "") ? Number(iso.slice(0, 4)) : null; }
+
+  /* Ce que propose le bouton « Inflation INSEE » pour une période (dates "AAAA-MM-JJ") vue à la date aujourdhui.
+     - type "reel" : période passée et couverte par la série ; cumul des moyennes annuelles anneeDebut → anneeFin.
+     - type "moyennes" : sinon ; moyennes sur 10 et 20 ans, avec la raison. */
+  function inflationPourPeriode(dateDebut, dateFin, aujourdhui) {
+    var aD = annee(dateDebut), aF = annee(dateFin);
+    var moyennes = { type: "moyennes", moyenne10: moyenneDernieresAnnees(10), moyenne20: moyenneDernieresAnnees(20),
+      periode10: (IPC.derniere - 9) + "-" + IPC.derniere, periode20: (IPC.derniere - 19) + "-" + IPC.derniere };
+    if (aD === null || aF === null || dateFin <= dateDebut) { moyennes.raison = "dates"; return moyennes; }
+    if (typeof aujourdhui === "string" && dateFin > aujourdhui) { moyennes.raison = "future"; return moyennes; }
+    if (aD < IPC.premiere - 1) { moyennes.raison = "avant"; return moyennes; }
+    if (aF > IPC.derniere) { moyennes.raison = "apres"; return moyennes; }
+    if (aF === aD) { moyennes.raison = "meme-annee"; return moyennes; }
+    return { type: "reel", taux: inflationCumulee(aD, aF), anneeDebut: aD, anneeFin: aF };
+  }
+
+  function profil(id) {
+    for (var i = 0; i < PROFILS.length; i++) if (PROFILS[i].id === id) return PROFILS[i];
+    return null;
+  }
+
+  return { IPC: IPC, PROFILS: PROFILS, variation: variation, inflationCumulee: inflationCumulee,
+    moyenneDernieresAnnees: moyenneDernieresAnnees, inflationPourPeriode: inflationPourPeriode, profil: profil };
+})();
+if (typeof module !== "undefined") module.exports = Donnees;
+</script>
+<script id="assistants">
+"use strict";
+/* Lot L6.1 : bouton « Inflation INSEE » et profils préremplis. Ce bloc ne fait que remplir les champs du formulaire,
+   puis signaler la saisie (événements input et change) : le calcul reste celui des blocs moteur et interface. */
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var deuxDecimales = new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  var taux = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 });
+  var RAISONS = {
+    future: "La période se termine après aujourd'hui : l'inflation réelle n'est pas encore connue.",
+    apres: "La série Insee intégrée s'arrête en " + Donnees.IPC.derniere + " : la période n'est pas entièrement couverte.",
+    avant: "La série Insee intégrée commence à la moyenne de " + (Donnees.IPC.premiere - 1) + " : la période n'est pas couverte.",
+    "meme-annee": "Les deux dates tombent la même année : la série annuelle ne permet pas de calcul réel.",
+    dates: "Les dates ne sont pas valides."
+  };
+  var etatInsee = null;
+
+  function aujourdHui() {
+    var d = new Date(), m = d.getMonth() + 1, j = d.getDate();
+    return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m + "-" + (j < 10 ? "0" : "") + j;
+  }
+  function signaler(el, type) { el.dispatchEvent(new Event(type, { bubbles: true })); }
+  /* Lot L6.1b : source citée dans la feuille « Paramètres » de l'export Excel. */
+  var SOURCE_INSEE = "Insee, IPC, évolution annuelle moyenne (France hors Mayotte, ensemble des ménages), insee.fr/fr/statistiques/4268033";
+  function remplirInflation(mode, fraction, source) {
+    var valeur = deuxDecimales.format(fraction * 100);
+    $("inflation").value = valeur;
+    /* Marque la valeur comme issue de la série Insee ; l'export ne cite la source que si valeur et mode sont inchangés. */
+    $("inflation").setAttribute("data-insee-valeur", valeur);
+    $("inflation").setAttribute("data-insee-mode", mode);
+    $("inflation").setAttribute("data-insee-source", source);
+    var radio = document.querySelector('input[name="modeInflation"][value="' + mode + '"]');
+    if (!radio.checked) { radio.checked = true; signaler(radio, "change"); }
+    signaler($("inflation"), "input");
+  }
+  function message(texte) { $("insee-message").textContent = texte; }
+
+  function inflationInsee() {
+    var r = Donnees.inflationPourPeriode($("dateDebut").value, $("dateFin").value, aujourdHui());
+    etatInsee = r;
+    if (r.type === "reel") {
+      $("insee-moyennes").hidden = true;
+      remplirInflation("cumulee", r.taux, SOURCE_INSEE + " : approximation " + r.anneeDebut + " → " + r.anneeFin +
+        " en cumul, de la moyenne annuelle " + r.anneeDebut + " à celle de " + r.anneeFin + ", mois non pris en compte.");
+      message("Approximation Insee " + r.anneeDebut + " → " + r.anneeFin + " : " + deuxDecimales.format(r.taux * 100) +
+        " % en cumul, de la moyenne annuelle " + r.anneeDebut + " à celle de " + r.anneeFin + ", mois non pris en compte. Si vous changez les dates, cliquez de nouveau.");
+      return;
+    }
+    $("insee-moy10").textContent = "Moyenne 10 ans · " + deuxDecimales.format(r.moyenne10 * 100) + " %";
+    $("insee-moy20").textContent = "Moyenne 20 ans · " + deuxDecimales.format(r.moyenne20 * 100) + " %";
+    $("insee-moyennes").hidden = false;
+    message(RAISONS[r.raison] + " Choisissez une moyenne annuelle passée (Insee " + r.periode10 + " ou " + r.periode20 +
+      ") : c'est une hypothèse, pas une prévision.");
+  }
+  function choisirMoyenne(nb) {
+    if (!etatInsee || etatInsee.type !== "moyennes") return;
+    var v = nb === 10 ? etatInsee.moyenne10 : etatInsee.moyenne20, periode = nb === 10 ? etatInsee.periode10 : etatInsee.periode20;
+    remplirInflation("annuelle", v, SOURCE_INSEE + " : moyenne annuelle " + periode + ". C'est l'inflation passée, pas une prévision.");
+    message("Hypothèse : inflation annuelle moyenne de l'Insee sur " + periode + ", " + deuxDecimales.format(v * 100) +
+      " % par an. C'est l'inflation passée, pas une prévision.");
+  }
+  function datesModifiees() {
+    if (etatInsee && etatInsee.type === "reel") {
+      etatInsee = null; message("Dates modifiées : cliquez de nouveau sur « Inflation INSEE » pour recalculer.");
+      var source = $("inflation").getAttribute("data-insee-source");
+      if (source) $("inflation").setAttribute("data-insee-source", source + " Dates modifiées depuis ce calcul : valeur établie pour d'autres dates.");
+    }
+  }
+
+  var boutonsProfils = Array.prototype.slice.call(document.querySelectorAll("button[data-profil]"));
+  function majProfils() {
+    var brut = $("rendement").value.replace(/[\s  %]/g, "").replace(",", ".");
+    var v = Number(brut), actif = null;
+    boutonsProfils.forEach(function (b) {
+      var p = Donnees.profil(b.getAttribute("data-profil"));
+      var egal = !!p && brut !== "" && isFinite(v) && Math.abs(v - p.rendement) < 1e-9;
+      b.setAttribute("aria-pressed", egal ? "true" : "false");
+      if (egal) actif = p;
+    });
+    $("aide-profil").textContent = actif ? "Profil " + actif.nom + " (" + actif.support + ") : " + actif.resume + ". Sources en bas de page." : "";
+  }
+  function appliquerProfil(id) {
+    var p = Donnees.profil(id);
+    if (!p) return;
+    $("rendement").value = taux.format(p.rendement);
+    signaler($("rendement"), "input");
+    majProfils();
+  }
+
+  boutonsProfils.forEach(function (b) { b.addEventListener("click", function () { appliquerProfil(b.getAttribute("data-profil")); }); });
+  $("rendement").addEventListener("input", majProfils);
+  $("bouton-insee").addEventListener("click", inflationInsee);
+  $("insee-moy10").addEventListener("click", function () { choisirMoyenne(10); });
+  $("insee-moy20").addEventListener("click", function () { choisirMoyenne(20); });
+  $("dateDebut").addEventListener("input", datesModifiees);
+  $("dateFin").addEventListener("input", datesModifiees);
+  majProfils();
+})();
+</script>
 <script id="indice-tableau-js">
 "use strict";
 /* Correctif 0.2.1 : indice « faites glisser » affiché seulement quand le tableau annuel déborde de son cadre. */
@@ -1228,6 +2915,40 @@ if (typeof module !== "undefined") module.exports = Moteur;
   window.addEventListener("resize", maj);
   if (window.MutationObserver) new MutationObserver(maj).observe(document.getElementById("corps-tableau"), { childList: true });
   maj();
+})();
+</script>
+<script id="repli">
+"use strict";
+/* Demande de Jean (25/11/2026 07:40) : « À quoi sert CadenceDCA ? » (#note) et « Sources des données » (#sources) repliées par défaut.
+   Le HTML des sections ne change pas : ce bloc range le titre et un bouton Déployer / Replier (aria-expanded, aria-controls) dans un
+   en-tête, et le reste dans un bloc masqué par l'attribut hidden. Le texte reste dans le DOM ; à l'impression, tout est déplié.
+   Une ancre vers un élément d'une section repliée la déplie. */
+(function () {
+  function repliable(id) {
+    var s = document.getElementById(id), h = s && s.querySelector("h2");
+    if (!h) return null;
+    var tete = document.createElement("div"), contenu = document.createElement("div"), b = document.createElement("button");
+    tete.className = "tete-repli"; contenu.className = "contenu-repli"; contenu.id = id + "-contenu";
+    if (!h.id) h.id = id + "-titre";
+    b.type = "button"; b.className = "bouton-secondaire bouton-repli";
+    b.setAttribute("aria-controls", contenu.id); b.setAttribute("aria-describedby", h.id);
+    while (h.nextSibling) contenu.appendChild(h.nextSibling);
+    s.insertBefore(tete, h); tete.appendChild(h); tete.appendChild(b); s.appendChild(contenu);
+    function regler(ouvert) {
+      contenu.hidden = !ouvert; s.classList.toggle("replie", !ouvert);
+      b.setAttribute("aria-expanded", ouvert ? "true" : "false"); b.textContent = ouvert ? "Replier" : "Déployer";
+    }
+    b.addEventListener("click", function () { regler(contenu.hidden); });
+    regler(false);
+    return { section: s, regler: regler };
+  }
+  var sections = [repliable("note"), repliable("sources")].filter(Boolean);
+  function suivreAncre() {
+    var cible = location.hash.length > 1 ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null;
+    if (cible) sections.forEach(function (x) { if (x.section.contains(cible)) x.regler(true); });
+  }
+  window.addEventListener("hashchange", suivreAncre);
+  suivreAncre();
 })();
 </script>
 <script id="theme">
